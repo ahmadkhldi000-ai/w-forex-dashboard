@@ -1,0 +1,89 @@
+═══════════════════════════════════════════════════════════
+   W-Forex-Dashboard  —  المشروع الكامل (EA + Server + Web UI)
+═══════════════════════════════════════════════════════════
+
+هذا المجلد يحتوي على الكود الكامل جاهزاً للعرض والنسخ.
+
+┌─── هيكل المجلد ──────────────────────────────────────────
+│
+│  📁 ea/
+│     └── InstitutionalHedgeEA.mq5
+│           ↓ EA الخاص بـ MT5 (مع وحدة اتصال السيرفر)
+│
+│  📁 server/
+│     ├── server.js            ← السيرفر الرئيسي (Express)
+│     ├── auth.js              ← نظام المصادقة (تسجيل/دخول/جلسات)
+│     ├── google.js            ← تسجيل الدخول بـ Google
+│     ├── seed-candles.js      ← سكربت بيانات تجريبية للشموع
+│     ├── package.json         ← تبعيات المشروع
+│     ├── package-lock.json
+│     ├── render.yaml          ← إعداد النشر على Render.com
+│     ├── README.md            ← شرح المشروع
+│     ├── .gitignore
+│     ├── .env.example         ← نموذج متغيرات البيئة
+│     └── 📁 public/           ← واجهة الويب
+│            ├── index.html    ← لوحة التحكم الرئيسية
+│            ├── login.html    ← صفحة الدخول
+│            ├── reset.html    ← استعادة كلمة المرور
+│            ├── app.js        ← منطق لوحة التحكم
+│            ├── auth.js       ← منطق الدخول/التسجيل
+│            ├── reset.js      ← منطق الاستعادة
+│            ├── style.css     ← تصميم لوحة التحكم
+│            ├── auth.css      ← تصميم الدخول
+│            ├── reset.css     ← تصميم الاستعادة
+│            ├── favicon.svg
+│            └── logo.svg
+│
+└──────────────────────────────────────────────────────────
+
+
+┌─── آلية الاتصال (EA ↔ Server) ───────────────────────────
+│
+│  EA يرسل بيانات حية كل 5 ثوانٍ عبر HTTP POST:
+│
+│    POST  https://<your-server>/api/update
+│    Header: X-Auth-Token: WFOREX_SECRET_2026
+│    Header: Content-Type: application/json
+│    Body: { bot, account, positions, candle, stats, regime }
+│
+│  وعند الإقلاع يرسل heartbeat:
+│
+│    POST  https://<your-server>/api/heartbeat
+│
+└──────────────────────────────────────────────────────────
+
+
+┌─── خطوات التشغيل ────────────────────────────────────────
+│
+│  1) السيرفر (محلياً):
+│     cd server
+│     npm install
+│     npm start
+│     → يعمل على http://localhost:3000
+│
+│  2) السيرفر (نشر سحابي على Render):
+│     - ارفع مجلد server/ إلى GitHub
+│     - استورد المستودع في render.com باستخدام render.yaml
+│     - عيّن متغير البيئة AUTH_TOKEN = WFOREX_SECRET_2026
+│
+│  3) الـ EA على MT5:
+│     - انسخ ea/InstitutionalHedgeEA.mq5 إلى:
+│       MQL5/Experts/  داخل مجلد بيانات MT5
+│     - Tools → Options → Expert Advisors
+│         ✅ فعّل "Allow WebRequest for listed URL"
+│         ➕ أضف رابط السيرفر (مثلاً https://w-forex-dashboard.onrender.com)
+│     - أرفق الـ EA على الشارت وتأكد من الإعدادات:
+│         DashboardURL   = رابط السيرفر
+│         DashboardToken = WFOREX_SECRET_2026  (نفس AUTH_TOKEN بالسيرفر)
+│         UseDashboard   = true
+│
+└──────────────────────────────────────────────────────────
+
+
+┌─── بيانات الدخول التجريبية ──────────────────────────────
+│
+│  حساب جاهز بعد أول تشغيل للسيرفر:
+│     📧 demo@wforex.io
+│     🔑 demo123
+│
+└──────────────────────────────────────────────────────────

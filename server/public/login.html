@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>W Forex · Sign in</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="auth.css">
+</head>
+<body class="auth-body">
+
+  <div class="bg-blobs" aria-hidden="true">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <main class="auth-wrap">
+    <div class="auth-card">
+
+      <!-- Brand -->
+      <a href="/" class="brand">
+        <img src="logo.svg" alt="W Forex" class="brand-logo">
+        <span class="brand-name">W&nbsp;Forex</span>
+      </a>
+
+      <!-- Back to home link -->
+      <a href="/#chartSection" class="back-home" id="backHome">
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+          <path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/>
+        </svg>
+        Back to bot view
+      </a>
+
+      <h1 class="auth-title" id="formTitle">Welcome back</h1>
+      <p class="auth-sub" id="formSub">Sign in to access your live trading dashboard.</p>
+
+      <!-- Error / success banner -->
+      <div class="auth-banner" id="banner" hidden></div>
+
+      <!-- Google Sign-In -->
+      <a href="/auth/google" class="btn-google" id="googleBtn">
+        <svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true">
+          <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22 22-9.8 22-22c0-1.5-.2-2.6-.4-3.5z"/>
+          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 4.1 29.6 2 24 2 16.3 2 9.7 6.3 6.3 14.7z"/>
+          <path fill="#4CAF50" d="M24 46c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5c-2 1.5-4.7 2.5-7.6 2.5-5.2 0-9.6-3.3-11.2-7.9l-6.6 5.1C9.7 41.7 16.2 46 24 46z"/>
+          <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.5l6.5 5.5C41.8 36.5 46 31 46 24c0-1.5-.2-2.6-.4-3.5z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </a>
+
+      <div class="divider"><span>or</span></div>
+
+      <!-- Form (login + signup share this) -->
+      <form id="authForm" class="auth-form" novalidate>
+        <div class="field" id="nameField" hidden>
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" autocomplete="name" placeholder="Your name">
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="password" name="password" autocomplete="current-password" placeholder="••••••••" required>
+            <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">👁</button>
+          </div>
+        </div>
+        <a href="/reset-password" class="forgot-link">Forgot password?</a>
+
+        <button type="submit" class="btn-primary" id="submitBtn">Sign in</button>
+      </form>
+
+      <!-- Switch mode -->
+      <p class="switch-mode">
+        <span id="switchText">Don't have an account?</span>
+        <a href="#" id="switchBtn">Create one</a>
+      </p>
+    </div>
+  </main>
+
+  <script src="auth.js"></script>
+</body>
+</html>

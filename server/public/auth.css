@@ -1,0 +1,186 @@
+/* W Forex · Auth pages — SaaSPlus-inspired theme */
+
+:root{
+  --bg:#0a0a0f;
+  --surface:rgba(255,255,255,0.03);
+  --surface-2:rgba(255,255,255,0.05);
+  --surface-hover:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);
+  --border-strong:rgba(255,255,255,0.14);
+  --text:#f5f5f7;
+  --text-2:#c7c7d1;
+  --muted:#8a8a98;
+  --faint:#5a5a68;
+  --accent:#7c5cff;
+  --accent-2:#a78bfa;
+  --accent-3:#ec4899;
+  --grad:linear-gradient(135deg,#7c5cff 0%,#a78bfa 45%,#ec4899 100%);
+  --grad-soft:linear-gradient(135deg,rgba(124,92,255,0.18),rgba(236,72,153,0.18));
+  --green:#22c55e;
+  --red:#ef4444;
+  --r-sm:10px;
+  --r-md:16px;
+  --r-lg:22px;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+.auth-body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  position:relative;
+}
+
+/* Background blobs (shared look with main dashboard) */
+.bg-blobs{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:0.5;animation:float 18s ease-in-out infinite}
+.blob-1{width:520px;height:520px;background:#7c5cff;top:-180px;left:-120px}
+.blob-2{width:440px;height:440px;background:#ec4899;top:30%;right:-160px;animation-delay:-6s}
+.blob-3{width:480px;height:480px;background:#3b82f6;bottom:-200px;left:30%;animation-delay:-12s}
+.grid-overlay{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 30%,transparent 75%);
+}
+@keyframes float{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(40px,-30px) scale(1.05)}
+  66%{transform:translate(-30px,20px) scale(0.97)}
+}
+
+/* Card */
+.auth-wrap{width:100%;max-width:420px}
+.auth-card{
+  padding:40px 36px;
+  border-radius:var(--r-lg);
+  background:var(--surface);
+  border:1px solid var(--border);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  animation:cardIn 0.5s ease;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* Back to home link */
+.back-home{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:600;color:var(--muted);
+  text-decoration:none;margin-bottom:22px;transition:color 0.2s;
+}
+.back-home:hover{color:var(--accent-2)}
+.back-home svg{transition:transform 0.2s}
+.back-home:hover svg{transform:translateX(-3px)}
+
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);margin-bottom:24px}
+.brand-logo{
+  width:38px;height:38px;border-radius:11px;display:block;flex-shrink:0;
+  box-shadow:0 4px 14px rgba(124,92,255,0.45);
+  transition:transform 0.2s;
+}
+.brand:hover .brand-logo{transform:scale(1.06) rotate(-3deg)}
+.brand-mark{
+  width:34px;height:34px;border-radius:10px;
+  background:var(--grad);display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:18px;color:#fff;
+  box-shadow:0 4px 14px rgba(124,92,255,0.45);
+}
+.brand-name{font-weight:800;font-size:18px;letter-spacing:-0.02em}
+
+.auth-title{font-size:28px;font-weight:800;letter-spacing:-0.03em;margin-bottom:6px}
+.auth-sub{font-size:14px;color:var(--muted);margin-bottom:28px}
+
+/* Banner */
+.auth-banner{
+  padding:12px 14px;border-radius:var(--r-sm);
+  font-size:13px;font-weight:500;margin-bottom:18px;
+  border:1px solid;
+}
+.auth-banner.error{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);color:#fca5a5}
+.auth-banner.success{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#86efac}
+
+/* Google button */
+.btn-google{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  width:100%;padding:13px;border-radius:var(--r-sm);
+  background:var(--surface-2);border:1px solid var(--border-strong);
+  color:var(--text);font-family:var(--font);font-size:14px;font-weight:600;
+  text-decoration:none;cursor:pointer;transition:all 0.2s;
+}
+.btn-google:hover{background:var(--surface-hover);border-color:rgba(255,255,255,0.2)}
+
+/* Divider */
+.divider{
+  display:flex;align-items:center;gap:14px;
+  margin:22px 0;color:var(--faint);font-size:12px;font-weight:500;
+}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.divider span{text-transform:uppercase;letter-spacing:0.1em}
+
+/* Form */
+.auth-form{display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:600;color:var(--text-2)}
+.field input{
+  width:100%;padding:12px 14px;border-radius:var(--r-sm);
+  background:var(--surface-2);border:1px solid var(--border);
+  color:var(--text);font-family:var(--font);font-size:14px;
+  transition:border-color 0.2s,background 0.2s;outline:none;
+}
+.field input::placeholder{color:var(--faint)}
+.field input:focus{border-color:var(--accent);background:var(--surface-hover)}
+
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:42px}
+.pw-toggle{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  background:transparent;border:none;cursor:pointer;
+  font-size:16px;padding:6px;opacity:0.6;transition:opacity 0.2s;
+}
+.pw-toggle:hover{opacity:1}
+
+/* Primary button */
+.btn-primary{
+  margin-top:6px;padding:13px;border-radius:var(--r-sm);
+  background:var(--grad);border:none;color:#fff;
+  font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;
+  transition:transform 0.15s,box-shadow 0.2s,opacity 0.2s;
+  box-shadow:0 6px 20px rgba(124,92,255,0.35);
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(124,92,255,0.5)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+
+/* Forgot password link */
+.forgot-link{
+  display:block;margin-top:-8px;text-align:right;
+  font-size:13px;font-weight:600;color:var(--accent-2);
+  text-decoration:none;transition:color 0.2s;
+}
+.forgot-link:hover{color:var(--accent-3);text-decoration:underline}
+
+/* Switch mode */
+.switch-mode{
+  margin-top:24px;text-align:center;font-size:14px;color:var(--muted);
+}
+.switch-mode a{
+  color:var(--accent-2);font-weight:600;text-decoration:none;margin-left:6px;
+}
+.switch-mode a:hover{text-decoration:underline}
+
+@media (max-width:480px){
+  .auth-card{padding:32px 24px}
+  .auth-title{font-size:24px}
+}

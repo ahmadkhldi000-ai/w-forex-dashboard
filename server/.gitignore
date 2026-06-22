@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Runtime data (NEVER commit these — contain user accounts & live state)
+data.json
+users.json
+resets.json
+
+# Environment
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+*.bak
+public/*.bak
+
+# Editor
+.vscode/
+.idea/
+
+# Seed scripts (one-time helpers)
+seed-candles.js
+
+# Local npm cache (used to work around permission issues)
+.npm-cache/

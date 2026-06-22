@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>W Forex · Live Trading Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== Decorative background blobs ===== -->
+  <div class="bg-blobs" aria-hidden="true">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- ===== Navbar ===== -->
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="#overview" class="brand" id="brandHome" title="Back to top">
+        <img src="logo.svg" alt="W Forex" class="brand-logo">
+        <span class="brand-name">W&nbsp;Forex</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#overview" class="active">Overview</a>
+        <a href="#positions">Positions</a>
+        <a href="#performance">Performance</a>
+        <a href="#history">History</a>
+      </nav>
+      <div class="nav-right">
+        <a href="#overview" class="home-btn" id="navHomeBtn" title="Back to home">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path fill="currentColor" d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z"/>
+          </svg>
+          <span>Home</span>
+        </a>
+        <span class="status-pill" id="navStatus">
+          <span class="dot"></span><span id="navStatusText">Offline</span>
+        </span>
+        <div class="user-menu">
+          <button class="user-btn" id="userBtn">
+            <span class="user-avatar" id="userAvatar">W</span>
+            <span class="user-name" id="userName">User</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown" hidden>
+            <div class="dd-header">
+              <span class="dd-email" id="ddEmail">—</span>
+              <span class="dd-provider" id="ddProvider">—</span>
+            </div>
+            <button class="dd-item" id="homeBtn">🏠 Home</button>
+            <button class="dd-item dd-danger" id="logoutBtn">Sign out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero" id="overview">
+    <div class="hero-inner">
+      <span class="badge">
+        <span class="badge-dot"></span>
+        W Forex Hedge Scalper · v<span id="botVersion">3.00</span>
+      </span>
+      <h1 class="hero-title">
+        Live Trading<br>
+        <span class="grad">Dashboard</span>
+      </h1>
+      <p class="hero-sub">
+        Real-time monitoring of your MT5 hedging scalp bot.
+        Account equity, open positions, market regime and adaptive learning — all in one place.
+      </p>
+      <div class="hero-meta">
+        <div class="meta-item">
+          <span class="meta-label">Symbol</span>
+          <span class="meta-value" id="heroSymbol">—</span>
+        </div>
+        <div class="meta-divider"></div>
+        <div class="meta-item">
+          <span class="meta-label">Uptime</span>
+          <span class="meta-value" id="heroUptime">0s</span>
+        </div>
+        <div class="meta-divider"></div>
+        <div class="meta-item">
+          <span class="meta-label">Last Update</span>
+          <span class="meta-value" id="heroLastUpdate">—</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Main ===== -->
+  <main class="main">
+
+    <!-- Metrics row -->
+    <section class="metrics" id="performance">
+      <div class="metric-card">
+        <div class="metric-head"><span class="metric-icon">⚖️</span><span>Balance</span></div>
+        <div class="metric-value" id="balance">$0.00</div>
+        <div class="metric-foot" id="balanceFoot">USD</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-head"><span class="metric-icon">📈</span><span>Equity</span></div>
+        <div class="metric-value" id="equity">$0.00</div>
+        <div class="metric-foot" id="equityFoot">USD</div>
+      </div>
+      <div class="metric-card highlight">
+        <div class="metric-head"><span class="metric-icon">💰</span><span>Floating P/L</span></div>
+        <div class="metric-value" id="profit">$0.00</div>
+        <div class="metric-foot" id="profitFoot">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-head"><span class="metric-icon">🛡️</span><span>Free Margin</span></div>
+        <div class="metric-value" id="freeMargin">$0.00</div>
+        <div class="metric-foot" id="freeMarginFoot">USD</div>
+      </div>
+    </section>
+
+    <!-- Two-column: regime + account -->
+    <section class="grid-2">
+      <div class="card" id="regimeCard">
+        <div class="card-head">
+          <h3>Market Regime</h3>
+          <span class="tag" id="regimeTag">—</span>
+        </div>
+        <div class="regime-row">
+          <div class="regime-cell">
+            <span class="regime-label">Current</span>
+            <span class="regime-value" id="regimeCurrent">—</span>
+          </div>
+          <div class="regime-cell">
+            <span class="regime-label">Volatility</span>
+            <span class="regime-value" id="regimeVol">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Account Snapshot</h3></div>
+        <div class="acct-grid">
+          <div class="acct-item">
+            <span class="acct-label">Margin Used</span>
+            <span class="acct-value" id="margin">$0.00</span>
+          </div>
+          <div class="acct-item">
+            <span class="acct-label">Currency</span>
+            <span class="acct-value" id="currency">USD</span>
+          </div>
+          <div class="acct-item">
+            <span class="acct-label">Margin Level</span>
+            <span class="acct-value" id="marginLevel">—</span>
+          </div>
+          <div class="acct-item">
+            <span class="acct-label">Free Margin</span>
+            <span class="acct-value" id="drawPower">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Candlestick chart -->
+    <section class="card section chart-card" id="chartSection">
+      <div class="card-head">
+        <h3>Price Action <span class="chart-sym" id="chartSym">—</span></h3>
+        <div class="chart-controls">
+          <div class="tf-group" id="tfGroup">
+            <button class="tf-btn" data-tf="1">1m</button>
+            <button class="tf-btn active" data-tf="5">5m</button>
+            <button class="tf-btn" data-tf="15">15m</button>
+            <button class="tf-btn" data-tf="60">1H</button>
+          </div>
+          <span class="tag tag-muted" id="chartLive">● LIVE</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <div id="candleChart"></div>
+        <div class="chart-watermark" aria-hidden="true">
+          <span class="wm-mark">W</span>
+          <span class="wm-text">W&nbsp;Forex</span>
+        </div>
+        <div class="chart-empty" id="chartEmpty">Waiting for price data…</div>
+      </div>
+      <div class="chart-legend">
+        <span><b>O</b> <span id="legendO">—</span></span>
+        <span><b>H</b> <span id="legendH">—</span></span>
+        <span><b>L</b> <span id="legendL">—</span></span>
+        <span><b>C</b> <span id="legendC">—</span></span>
+        <span class="legend-vol"><b>Vol</b> <span id="legendVol">—</span></span>
+      </div>
+    </section>
+
+    <!-- Positions -->
+    <section class="card section" id="positions">
+      <div class="card-head">
+        <h3>Open Positions <span class="count" id="posCount">0</span></h3>
+        <span class="tag tag-muted" id="posTag">live</span>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Ticket</th><th>Symbol</th><th>Side</th>
+              <th>Volume</th><th>Open</th><th>Current</th>
+              <th>P/L</th>
+            </tr>
+          </thead>
+          <tbody id="positionsBody">
+            <tr><td colspan="7" class="empty">No open positions</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Adaptive learning -->
+    <section class="card section" id="learning">
+      <div class="card-head"><h3>Adaptive Learning</h3></div>
+      <div class="learn-grid">
+        <div class="learn-card">
+          <div class="learn-head"><span class="learn-dot trend"></span>Trend</div>
+          <div class="learn-stats">
+            <div><span class="ls-label">Trades</span><span class="ls-val" id="trendTrades">0</span></div>
+            <div><span class="ls-label">Wins</span><span class="ls-val" id="trendWins">0</span></div>
+            <div><span class="ls-label">Profit</span><span class="ls-val" id="trendProfit">$0.00</span></div>
+            <div><span class="ls-label">Risk ×</span><span class="ls-val" id="trendRisk">1.0</span></div>
+            <div><span class="ls-label">Grid ×</span><span class="ls-val" id="trendGrid">1.0</span></div>
+          </div>
+        </div>
+        <div class="learn-card">
+          <div class="learn-head"><span class="learn-dot range"></span>Range</div>
+          <div class="learn-stats">
+            <div><span class="ls-label">Trades</span><span class="ls-val" id="rangeTrades">0</span></div>
+            <div><span class="ls-label">Wins</span><span class="ls-val" id="rangeWins">0</span></div>
+            <div><span class="ls-label">Profit</span><span class="ls-val" id="rangeProfit">$0.00</span></div>
+            <div><span class="ls-label">Risk ×</span><span class="ls-val" id="rangeRisk">1.0</span></div>
+            <div><span class="ls-label">Grid ×</span><span class="ls-val" id="rangeGrid">1.0</span></div>
+          </div>
+        </div>
+        <div class="learn-card">
+          <div class="learn-head"><span class="learn-dot spike"></span>Spike</div>
+          <div class="learn-stats">
+            <div><span class="ls-label">Trades</span><span class="ls-val" id="spikeTrades">0</span></div>
+            <div><span class="ls-label">Wins</span><span class="ls-val" id="spikeWins">0</span></div>
+            <div><span class="ls-label">Profit</span><span class="ls-val" id="spikeProfit">$0.00</span></div>
+            <div><span class="ls-label">Risk ×</span><span class="ls-val" id="spikeRisk">1.0</span></div>
+            <div><span class="ls-label">Grid ×</span><span class="ls-val" id="spikeGrid">1.0</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Telegram channel feed -->
+    <section class="card section" id="telegram">
+      <div class="card-head">
+        <h3>
+          <svg class="tg-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+          </svg>
+          Telegram Signals
+        </h3>
+        <span class="tag tag-muted" id="tgLive">● LIVE</span>
+      </div>
+      <div class="tg-feed" id="tgFeed">
+        <div class="tg-empty">No signals yet — the bot will post here when it trades.</div>
+      </div>
+    </section>
+
+    <!-- History -->
+    <section class="card section" id="history">
+      <div class="card-head">
+        <h3>Trade History <span class="count" id="histCount">0</span></h3>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Time</th><th>Side</th><th>Volume</th>
+              <th>P/L</th><th>Reason</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="5" class="empty">No history yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="logo.svg" alt="W Forex" class="brand-logo sm">
+        <span>W Forex Hedge Scalper · <span id="footerVersion">3.00</span></span>
+      </div>
+      <div class="footer-meta">
+        <span>Last update: <span id="lastUpdate">—</span></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Render Blueprint — auto-deploys W-Forex Dashboard
+# After pushing to GitHub, import this repo at https://render.com
+previewsExpireAfterDays: 1
+services:
+  - type: web
+    name: w-forex-dashboard
+    runtime: node
+    plan: free
+    region: frankfurt   # closest to most users; change if needed
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /login
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: COOKIE_SECURE
+        value: 'true'
+      # Generate strong random secrets — DO NOT use these in production
+      - key: AUTH_TOKEN
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true

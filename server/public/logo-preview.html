@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>W Forex · Logo Preview</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Inter',sans-serif;background:#0a0a0f;color:#f5f5f7;
+      min-height:100vh;padding:40px 20px;
+    }
+    .wrap{max-width:900px;margin:0 auto}
+    h1{font-size:32px;font-weight:800;margin-bottom:8px;background:linear-gradient(135deg,#7c5cff,#a78bfa,#ec4899);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .sub{color:#8a8a98;margin-bottom:40px;font-size:15px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:40px}
+    .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;display:flex;flex-direction:column;align-items:center;gap:14px}
+    .card.light{background:#f5f5f7;color:#0a0a0f}
+    .card.gradient{background:linear-gradient(135deg,#7c5cff,#ec4899)}
+    .label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;opacity:0.7}
+    .row{display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:30px;margin-bottom:20px}
+    .brand-demo{display:flex;align-items:center;gap:10px}
+    .brand-demo img{box-shadow:0 4px 14px rgba(124,92,255,0.45)}
+    .brand-demo span{font-size:20px;font-weight:800;letter-spacing:-0.02em}
+    .footer{text-align:center;color:#5a5a68;font-size:13px;margin-top:40px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.08)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>W Forex · Logo</h1>
+    <p class="sub">Professional brand mark — vector SVG, scales to any size, matches the site's gradient theme.</p>
+
+    <div class="grid">
+      <div class="card">
+        <img src="logo.svg" width="120" height="120" alt="logo large">
+        <span class="label">120px · Dark</span>
+      </div>
+      <div class="card light">
+        <img src="logo.svg" width="120" height="120" alt="logo on light">
+        <span class="label">120px · Light</span>
+      </div>
+      <div class="card gradient">
+        <img src="logo.svg" width="120" height="120" alt="logo on gradient">
+        <span class="label">120px · Gradient</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="brand-demo"><img src="logo.svg" width="44" height="44" alt="logo"><span style="color:#f5f5f7">W Forex</span></div>
+      <div class="brand-demo"><img src="logo.svg" width="34" height="34" alt="logo"><span style="color:#f5f5f7">W Forex</span></div>
+      <div class="brand-demo"><img src="logo.svg" width="28" height="28" alt="logo"><span style="color:#f5f5f7">W Forex</span></div>
+      <div class="brand-demo"><img src="favicon.svg" width="20" height="20" alt="favicon"></div>
+      <div class="brand-demo"><img src="favicon.svg" width="16" height="16" alt="favicon"></div>
+    </div>
+
+    <p class="footer">logo.svg (1843 bytes) · favicon.svg (516 bytes) · pure vector · no external deps</p>
+  </div>
+</body>
+</html>
