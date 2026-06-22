@@ -380,81 +380,93 @@ function pushCandle(c) {
 }
 
 // ---------- demo data generator (SIM mode) ----------
-// When SIM_MODE=on, the server fabricates live-looking candles + positions
-// so the dashboard animates without a connected EA. Turned off when the real
-// EA starts pushing data (detected via /api/update).
+// When SIM_MODE=on, the server feeds REAL gold candles + animates demo positions
+// so the dashboard shows a genuine live chart without a connected EA.
+// Turned off when the real EA starts pushing data (detected via /api/update).
 const SIM_MODE = (process.env.SIM_MODE || '').toLowerCase() === 'on';
 let simLastPush = 0;
-let simPrice = 4198.50;             // starting GOLD (XAUUSD) price — synced to real market
-let simAnchorPrice = 4198.50;       // last real price fetched from gold-api (drift anchor)
-let simAnchorTime = 0;              // when the anchor was last refreshed
-let simDir = 1;                     // +1 up, -1 down
+let simPrice = 4198.50;
+let simAnchorPrice = 4198.50;
+let simAnchorTime = 0;
+let simDir = 1;
 const SIM_SYMBOL = process.env.SIM_SYMBOL || 'XAUUSD';
-const SIM_DIGITS = Number(process.env.SIM_DIGITS || 2);   // gold quotes to 2 decimals
 
-// Fetch the real gold spot price from gold-api.com (free, no key, CORS-friendly).
-// Used as a drift anchor so the simulated chart tracks the real market.
-async function refreshGoldAnchor() {
+// Fetch REAL gold candlesticks (OHLCV) from Yahoo Finance (GC=F = gold futures).
+// Returns an array of {time, open, high, low, close, volume} oldest->newest.
+async function fetchRealGoldCandles(interval, range) {
+  interval = interval || '1m';
+  range = range || '1d';
+  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=' + interval + '&range=' + range;
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; WForexBot/1.0)' },
+    signal: AbortSignal.timeout(10000)
+  });
+  if (!res.ok) throw new Error('Yahoo HTTP ' + res.status);
+  const j = await res.json();
+  const r = j.chart.result[0];
+  const ts = r.timestamp || [];
+  const q = r.indicators.quote[0];
+  const out = [];
+  for (let i = 0; i < ts.length; i++) {
+    const o = q.open[i], h = q.high[i], l = q.low[i], c = q.close[i], v = q.volume[i];
+    if (o == null || h == null || l == null || c == null) continue;
+    out.push({ time: ts[i], open: o, high: h, low: l, close: c, volume: v || 0 });
+  }
+  return out;
+}
+
+// Periodic full refresh of real gold history -> replaces state.candles entirely.
+async function refreshRealGoldHistory() {
+  if (!SIM_MODE) return;
   try {
-    const res = await fetch('https://api.gold-api.com/price/XAU', { signal: AbortSignal.timeout(8000) });
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data && typeof data.price === 'number' && data.price > 100) {
-      simAnchorPrice = data.price;
+    const candles = await fetchRealGoldCandles('1m', '1d');
+    if (candles.length > 0) {
+      state.candles = candles.slice(-500);
+      const last = candles[candles.length - 1];
+      simPrice = last.close;
+      simAnchorPrice = last.close;
       simAnchorTime = Date.now();
-      console.log('  → Gold anchor refreshed: $' + simAnchorPrice.toFixed(2));
+      console.log('  -> Real gold candles loaded: ' + candles.length + ' | last close: $' + last.close.toFixed(2));
     }
   } catch (e) {
-    // network hiccup — keep the previous anchor, try again next cycle
+    console.warn('  -> Real gold fetch failed:', e.message);
   }
 }
 
+// Tick: interpolate the latest (forming) candle with live price + animate positions.
 function simStep() {
   if (!SIM_MODE) return;
-
   // If a real EA pushed recently, stay quiet (don't fight it).
-  // SIM marks lastUpdate with a sentinel so it never trips its own guard.
   if (state.bot.online && state.bot.source === 'ea' &&
       Date.now() - state.bot.lastUpdate < 30000) return;
 
   const nowSec = Math.floor(Date.now() / 1000);
-  const barLen = 60;               // 1-minute candles
+  const barLen = 60;
   const bucket = Math.floor(nowSec / barLen) * barLen;
 
-  // Random-walk the price with mild momentum (gold moves in $ increments)
-  const drift = (Math.random() - 0.5) * 0.80;        // ~$0.80 per tick swing
-  simPrice = Math.max(100, simPrice + drift + simDir * 0.12);
-  if (Math.random() < 0.08) simDir *= -1;   // occasional reversal
-  // Gently pull the simulated price toward the real market anchor so the
-  // chart stays close to the genuine gold spot price over time.
-  if (simAnchorTime > 0) {
-    simPrice = simPrice + (simAnchorPrice - simPrice) * 0.04;
-  }
+  // Drift the live price toward the real anchor with small intrabar noise.
+  const drift = (Math.random() - 0.5) * 0.30;
+  simPrice = simPrice + drift + (simAnchorPrice - simPrice) * 0.08;
+  if (Math.random() < 0.08) simDir *= -1;
 
   const last = state.candles[state.candles.length - 1];
-  let candle;
   if (last && last.time === bucket) {
-    candle = last;
-    candle.high = Math.max(candle.high, simPrice);
-    candle.low  = Math.min(candle.low,  simPrice);
-    candle.close = simPrice;
-    candle.volume = (candle.volume || 0) + Math.floor(Math.random() * 50);
-  } else {
-    candle = {
+    last.high  = Math.max(last.high, simPrice);
+    last.low   = Math.min(last.low,  simPrice);
+    last.close = simPrice;
+    last.volume = (last.volume || 0) + Math.floor(Math.random() * 30);
+  } else if (simAnchorTime > 0) {
+    state.candles.push({
       time: bucket,
-      open:  last ? last.close : simPrice,
-      high:  simPrice,
-      low:   simPrice,
-      close: simPrice,
-      volume: Math.floor(Math.random() * 100)
-    };
-    state.candles.push(candle);
+      open: last ? last.close : simPrice,
+      high: simPrice, low: simPrice, close: simPrice,
+      volume: Math.floor(Math.random() * 50)
+    });
     if (state.candles.length > 500) state.candles.shift();
   }
 
-  // Mark the bot as online (SIM source)
   state.bot = {
-    name: 'W Forex Hedge Scalper (SIM)',
+    name: 'W Forex Hedge Scalper',
     symbol: SIM_SYMBOL,
     online: true,
     source: 'sim',
@@ -462,7 +474,6 @@ function simStep() {
     uptime: (state.bot.uptime || 0) + 2
   };
 
-  // Occasionally open/close demo positions so the "Open Positions" panel animates
   if (Math.random() < 0.25 && state.positions.length < 6) {
     const isBuy = Math.random() < 0.5;
     const entry = simPrice;
@@ -474,58 +485,40 @@ function simStep() {
       lots: lot,
       open: entry,
       current: simPrice,
-      sl: isBuy ? entry - 15 : entry + 15,         // $15 stop for gold
-      tp: isBuy ? entry + 10 : entry - 10,         // $10 target for gold
-      // Gold: 1 lot = 100 oz → $ profit = priceDiff * lots * 100
+      sl: isBuy ? entry - 15 : entry + 15,
+      tp: isBuy ? entry + 10 : entry - 10,
       profit: (isBuy ? (simPrice - entry) : (entry - simPrice)) * lot * 100,
       tag: ['Trend','Range','Spike'][Math.floor(Math.random()*3)],
       time: Date.now()
     });
   }
-  // occasionally close a profitable position → record into history
   for (let i = state.positions.length - 1; i >= 0; i--) {
     const p = state.positions[i];
-    // simulate price moving toward TP/SL with mild randomness
-    if (p.type === 'buy') p.current = simPrice;
-    else p.current = simPrice;
+    p.current = simPrice;
     p.profit = (p.type === 'buy' ? (p.current - p.open) : (p.open - p.current)) * p.lots * 100;
     if (p.profit > 1.8 || p.profit < -4 || Math.random() < 0.04) {
       const closed = state.positions.splice(i, 1)[0];
       state.history.unshift({
-        ticket: closed.ticket,
-        symbol: closed.symbol,
-        type: closed.type,
-        lots: closed.lots,
-        profit: closed.profit,
-        time: Date.now()
+        ticket: closed.ticket, symbol: closed.symbol, type: closed.type,
+        lots: closed.lots, profit: closed.profit, time: Date.now()
       });
       if (state.history.length > 200) state.history.length = 200;
     }
   }
 
-  // Rolling account stats derived from open positions
   const openProfit = state.positions.reduce((s,p) => s + p.profit, 0);
   const baseBalance = 10000;
   state.account = {
-    balance: baseBalance,
-    equity: baseBalance + openProfit,
-    profit: openProfit,
-    margin: 50,
-    freeMargin: baseBalance + openProfit - 50,
+    balance: baseBalance, equity: baseBalance + openProfit, profit: openProfit,
+    margin: 50, freeMargin: baseBalance + openProfit - 50,
     marginLevel: ((baseBalance + openProfit) / 50) * 100,
-    leverage: 500,
-    login: 9999999,
-    server: 'SIM-Demo',
-    currency: 'USD',
-    startBalance: baseBalance,
-    dayStartEquity: baseBalance
+    leverage: 500, login: 9999999, server: 'SIM-Demo', currency: 'USD',
+    startBalance: baseBalance, dayStartEquity: baseBalance
   };
-
   const wins = state.history.filter(h => h.profit > 0).length;
   state.stats = {
     openPositions: state.positions.length,
-    totalTrades: state.history.length,
-    wins,
+    totalTrades: state.history.length, wins,
     losses: state.history.length - wins,
     winRate: state.history.length ? (wins / state.history.length) * 100 : 0,
     todayProfit: state.history.reduce((s,h)=>s+h.profit,0),
@@ -566,14 +559,14 @@ setInterval(persist, 10000);
 
 // ---------- SIM data generator tick ----------
 if (SIM_MODE) {
-  // seed initial history so the chart isn't empty on first load
+  // Load REAL gold candlesticks first so the chart shows genuine OHLC bars
+  refreshRealGoldHistory();
+  // Re-fetch the full real history every 2 minutes (keeps chart accurate)
+  setInterval(refreshRealGoldHistory, 2 * 60 * 1000);
+  // Animate the forming candle + demo positions every 2s
   simStep();
   setInterval(simStep, 2000);
-  // Sync the simulated price to the REAL gold spot every 5 minutes
-  refreshGoldAnchor();
-  setInterval(refreshGoldAnchor, 5 * 60 * 1000);
-  console.log('  → SIM_MODE: ON (live gold chart + positions every 2s)');
-  console.log('  → Real gold price sync: every 5 min (gold-api.com)');
+  console.log('  → SIM_MODE: ON (REAL gold candles from Yahoo Finance + live positions)');
 }
 
 app.listen(PORT, () => {
