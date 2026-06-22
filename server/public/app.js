@@ -26,6 +26,8 @@ const els = {
 let chart = null, candleSeries = null, volumeSeries = null;
 let currentTf = 5; // minutes
 let lastCandleTime = 0;
+let chartDataCache = [];
+let positionPriceLines = [];   // live position entry/SL/TP markers on the chart
 
 function initChart(){
   if (typeof LightweightCharts === 'undefined' || chart) return;
@@ -34,39 +36,78 @@ function initChart(){
 
   chart = LightweightCharts.createChart(container, {
     layout: {
-      background: { type: 'solid', color: 'transparent' },
-      textColor: '#8a8a98',
-      fontFamily: "'Inter', sans-serif"
+      background: { type: 'solid', color: '#0b0e11' },
+      textColor: '#d1d4dc',
+      fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
+      fontSize: 11,
+      attributionLogo: false
     },
     grid: {
-      vertLines: { color: 'rgba(255,255,255,0.04)' },
-      horzLines: { color: 'rgba(255,255,255,0.04)' }
+      vertLines: { color: 'rgba(255,255,255,0.05)', style: 1 },
+      horzLines: { color: 'rgba(255,255,255,0.05)', style: 1 }
     },
-    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
-    rightPriceScale: { borderColor: 'rgba(255,255,255,0.08)' },
+    crosshair: {
+      mode: LightweightCharts.CrosshairMode.Normal,
+      vertLine: { color: 'rgba(234,179,8,0.5)', width: 1, style: 2, labelBackgroundColor: '#eab308' },
+      horzLine: { color: 'rgba(234,179,8,0.5)', width: 1, style: 2, labelBackgroundColor: '#eab308' }
+    },
+    rightPriceScale: {
+      borderColor: 'rgba(255,255,255,0.10)',
+      scaleMargins: { top: 0.10, bottom: 0.28 },
+      autoScale: true
+    },
     timeScale: {
-      borderColor: 'rgba(255,255,255,0.08)',
-      timeVisible: true, secondsVisible: false
+      borderColor: 'rgba(255,255,255,0.10)',
+      timeVisible: true,
+      secondsVisible: false,
+      rightOffset: 4,
+      barSpacing: 8
     },
+    handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true },
+    handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
     autoSize: true
   });
 
+  // Professional candlestick series — gold-themed, hollow-up style
   candleSeries = chart.addCandlestickSeries({
-    upColor: '#22c55e', downColor: '#ef4444',
-    borderUpColor: '#22c55e', borderDownColor: '#ef4444',
-    wickUpColor: '#22c55e', wickDownColor: '#ef4444'
+    upColor: '#eab308',
+    downColor: '#ef4444',
+    borderUpColor: '#eab308',
+    borderDownColor: '#ef4444',
+    wickUpColor: '#a16207',
+    wickDownColor: '#b91c1c',
+    borderVisible: true,
+    priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
+    priceLineColor: 'rgba(234,179,8,0.6)',
+    priceLineStyle: 2
   });
-  candleSeries.priceScale().applyOptions({ scaleMargins: { top: 0.08, bottom: 0.28 } });
+
+  // Last-price marker line (live tracker)
+  try {
+    candleSeries.applyOptions({ priceLineVisible: true });
+  } catch(e) {}
+  candleSeries.priceScale().applyOptions({ scaleMargins: { top: 0.10, bottom: 0.30 } });
 
   volumeSeries = chart.addHistogramSeries({
     priceFormat: { type: 'volume' },
-    priceScaleId: '', color: 'rgba(124,92,255,0.5)'
+    priceScaleId: '', color: 'rgba(234,179,8,0.30)'
   });
   volumeSeries.priceScale().applyOptions({ scaleMargins: { top: 0.78, bottom: 0 } });
 
-  // Crosshair legend update
+  // Crosshair legend update (pro OHLC readout; falls back to latest candle)
   chart.subscribeCrosshairMove(param => {
-    if (!param || !param.time || !param.seriesData.size) return;
+    if (!param || !param.time || !param.seriesData.size) {
+      const last = chartDataCache[chartDataCache.length - 1];
+      if (last) {
+        $('legendO').textContent = num(last.open, 2);
+        $('legendH').textContent = num(last.high, 2);
+        $('legendL').textContent = num(last.low, 2);
+        $('legendC').textContent = num(last.close, 2);
+        $('legendVol').textContent = num(last.volume, 0);
+        paintLegend(last.open, last.close);
+      }
+      return;
+    }
     const d = param.seriesData.get(candleSeries);
     const v = param.seriesData.get(volumeSeries);
     if (!d) return;
@@ -78,7 +119,7 @@ function initChart(){
     paintLegend(d.open, d.close);
   });
 
-  const ro = new ResizeObserver(() => { if (chart) chart.applyOptions({}); });
+  const ro = new ResizeObserver(() => { if (chart) chart.applyOptions({ width: container.clientWidth, height: container.clientHeight }); });
   ro.observe(container);
 }
 
@@ -116,12 +157,13 @@ function updateChart(state){
   if (raw.length === 0 || !chart) return;
 
   const bucketed = bucketCandles(raw, currentTf);
+  chartDataCache = bucketed;
   candleSeries.setData(bucketed.map(c => ({
     time: c.time, open: c.open, high: c.high, low: c.low, close: c.close
   })));
   volumeSeries.setData(bucketed.map(c => ({
     time: c.time, value: c.volume,
-    color: c.close >= c.open ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'
+    color: c.close >= c.open ? 'rgba(234,179,8,0.35)' : 'rgba(239,68,68,0.35)'
   })));
 
   const last = bucketed[bucketed.length - 1];
@@ -139,6 +181,37 @@ function updateChart(state){
     chart.timeScale().scrollToRealTime();
     lastCandleTime = newest;
   }
+
+  // Redraw position markers (entry / SL / TP) on the chart
+  drawPositionLines(state.positions || []);
+}
+
+// Draw horizontal price lines for open positions: entry (gold), SL (red), TP (green)
+function drawPositionLines(positions){
+  if (!candleSeries) return;
+  // Clear previous lines
+  positionPriceLines.forEach(pl => { try { candleSeries.removePriceLine(pl); } catch(e){} });
+  positionPriceLines = [];
+  positions.forEach(p => {
+    if (!p || typeof p.open !== 'number') return;
+    try {
+      positionPriceLines.push(candleSeries.createPriceLine({
+        price: p.open,
+        color: '#eab308',
+        lineWidth: 2, lineStyle: 0,
+        axisLabelVisible: true,
+        title: (p.type === 'buy' ? '▲ ' : '▼ ') + '#' + p.ticket + ' ENTRY'
+      }));
+      if (typeof p.sl === 'number' && p.sl > 0) positionPriceLines.push(candleSeries.createPriceLine({
+        price: p.sl, color: '#ef4444', lineWidth: 1, lineStyle: 2,
+        axisLabelVisible: true, title: 'SL'
+      }));
+      if (typeof p.tp === 'number' && p.tp > 0) positionPriceLines.push(candleSeries.createPriceLine({
+        price: p.tp, color: '#22c55e', lineWidth: 1, lineStyle: 2,
+        axisLabelVisible: true, title: 'TP'
+      }));
+    } catch(e){}
+  });
 }
 
 // Timeframe switcher
