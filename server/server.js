@@ -385,9 +385,10 @@ function pushCandle(c) {
 // EA starts pushing data (detected via /api/update).
 const SIM_MODE = (process.env.SIM_MODE || '').toLowerCase() === 'on';
 let simLastPush = 0;
-let simPrice = 1.08500;            // starting EURUSD price
-let simDir = 1;                    // +1 up, -1 down
-const SIM_SYMBOL = process.env.SIM_SYMBOL || 'EURUSD';
+let simPrice = 2345.50;             // starting GOLD (XAUUSD) price
+let simDir = 1;                     // +1 up, -1 down
+const SIM_SYMBOL = process.env.SIM_SYMBOL || 'XAUUSD';
+const SIM_DIGITS = Number(process.env.SIM_DIGITS || 2);   // gold quotes to 2 decimals
 
 function simStep() {
   if (!SIM_MODE) return;
@@ -401,9 +402,9 @@ function simStep() {
   const barLen = 60;               // 1-minute candles
   const bucket = Math.floor(nowSec / barLen) * barLen;
 
-  // Random-walk the price with mild momentum
-  const drift = (Math.random() - 0.5) * 0.00040;
-  simPrice = Math.max(0.5, simPrice + drift + simDir * 0.00005);
+  // Random-walk the price with mild momentum (gold moves in $ increments)
+  const drift = (Math.random() - 0.5) * 0.80;        // ~$0.80 per tick swing
+  simPrice = Math.max(100, simPrice + drift + simDir * 0.12);
   if (Math.random() < 0.08) simDir *= -1;   // occasional reversal
 
   const last = state.candles[state.candles.length - 1];
@@ -449,9 +450,10 @@ function simStep() {
       lots: lot,
       open: entry,
       current: simPrice,
-      sl: isBuy ? entry - 0.0015 : entry + 0.0015,
-      tp: isBuy ? entry + 0.0010 : entry - 0.0010,
-      profit: (isBuy ? (simPrice - entry) : (entry - simPrice)) * lot * 100000,
+      sl: isBuy ? entry - 15 : entry + 15,         // $15 stop for gold
+      tp: isBuy ? entry + 10 : entry - 10,         // $10 target for gold
+      // Gold: 1 lot = 100 oz → $ profit = priceDiff * lots * 100
+      profit: (isBuy ? (simPrice - entry) : (entry - simPrice)) * lot * 100,
       tag: ['Trend','Range','Spike'][Math.floor(Math.random()*3)],
       time: Date.now()
     });
@@ -462,7 +464,7 @@ function simStep() {
     // simulate price moving toward TP/SL with mild randomness
     if (p.type === 'buy') p.current = simPrice;
     else p.current = simPrice;
-    p.profit = (p.type === 'buy' ? (p.current - p.open) : (p.open - p.current)) * p.lots * 100000;
+    p.profit = (p.type === 'buy' ? (p.current - p.open) : (p.open - p.current)) * p.lots * 100;
     if (p.profit > 1.8 || p.profit < -4 || Math.random() < 0.04) {
       const closed = state.positions.splice(i, 1)[0];
       state.history.unshift({
