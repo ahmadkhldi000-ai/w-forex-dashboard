@@ -140,7 +140,15 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+app.use(express.static(path.join(__dirname, 'public'), {
+  index: false,
+  setHeaders: (res, filePath) => {
+    // Never cache HTML entry points — ensures auth checks always run fresh
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    }
+  }
+}));
 
 // ---------- auth helper (EA token) ----------
 function auth(req, res, next) {
@@ -386,7 +394,9 @@ app.get('/api/state', (req, res) => {
 });
 
 // ---------- SPA fallback ----------
-app.get('*', (req, res) => {
+// Protect ALL non-API routes behind auth so the dashboard HTML/data
+// is never served to an unauthenticated browser.
+app.get('*', authLib.requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
