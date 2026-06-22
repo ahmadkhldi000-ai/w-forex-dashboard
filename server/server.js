@@ -385,10 +385,29 @@ function pushCandle(c) {
 // EA starts pushing data (detected via /api/update).
 const SIM_MODE = (process.env.SIM_MODE || '').toLowerCase() === 'on';
 let simLastPush = 0;
-let simPrice = 2345.50;             // starting GOLD (XAUUSD) price
+let simPrice = 4198.50;             // starting GOLD (XAUUSD) price — synced to real market
+let simAnchorPrice = 4198.50;       // last real price fetched from gold-api (drift anchor)
+let simAnchorTime = 0;              // when the anchor was last refreshed
 let simDir = 1;                     // +1 up, -1 down
 const SIM_SYMBOL = process.env.SIM_SYMBOL || 'XAUUSD';
 const SIM_DIGITS = Number(process.env.SIM_DIGITS || 2);   // gold quotes to 2 decimals
+
+// Fetch the real gold spot price from gold-api.com (free, no key, CORS-friendly).
+// Used as a drift anchor so the simulated chart tracks the real market.
+async function refreshGoldAnchor() {
+  try {
+    const res = await fetch('https://api.gold-api.com/price/XAU', { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && typeof data.price === 'number' && data.price > 100) {
+      simAnchorPrice = data.price;
+      simAnchorTime = Date.now();
+      console.log('  → Gold anchor refreshed: $' + simAnchorPrice.toFixed(2));
+    }
+  } catch (e) {
+    // network hiccup — keep the previous anchor, try again next cycle
+  }
+}
 
 function simStep() {
   if (!SIM_MODE) return;
@@ -406,6 +425,11 @@ function simStep() {
   const drift = (Math.random() - 0.5) * 0.80;        // ~$0.80 per tick swing
   simPrice = Math.max(100, simPrice + drift + simDir * 0.12);
   if (Math.random() < 0.08) simDir *= -1;   // occasional reversal
+  // Gently pull the simulated price toward the real market anchor so the
+  // chart stays close to the genuine gold spot price over time.
+  if (simAnchorTime > 0) {
+    simPrice = simPrice + (simAnchorPrice - simPrice) * 0.04;
+  }
 
   const last = state.candles[state.candles.length - 1];
   let candle;
@@ -545,7 +569,11 @@ if (SIM_MODE) {
   // seed initial history so the chart isn't empty on first load
   simStep();
   setInterval(simStep, 2000);
-  console.log('  → SIM_MODE: ON (fabricating demo candles/positions every 2s)');
+  // Sync the simulated price to the REAL gold spot every 5 minutes
+  refreshGoldAnchor();
+  setInterval(refreshGoldAnchor, 5 * 60 * 1000);
+  console.log('  → SIM_MODE: ON (live gold chart + positions every 2s)');
+  console.log('  → Real gold price sync: every 5 min (gold-api.com)');
 }
 
 app.listen(PORT, () => {
@@ -553,6 +581,15 @@ app.listen(PORT, () => {
   if (!authLib.findUserByEmail('demo@wforex.io')) {
     authLib.createUser({ email: 'demo@wforex.io', name: 'Demo Trader', password: 'demo123', provider: 'local' });
     console.log('✓ Seeded demo account: demo@wforex.io / demo123');
+  }
+  // Persist admin/owner account across deploys (Render free wipes the filesystem
+  // on each deploy, so we re-seed the owner from env vars on every boot).
+  const ownerEmail = process.env.OWNER_EMAIL;
+  const ownerPass  = process.env.OWNER_PASSWORD;
+  const ownerName  = process.env.OWNER_NAME || 'Owner';
+  if (ownerEmail && ownerPass && !authLib.findUserByEmail(ownerEmail)) {
+    authLib.createUser({ email: ownerEmail, name: ownerName, password: ownerPass, provider: 'local' });
+    console.log('✓ Seeded owner account: ' + ownerEmail);
   }
 
   console.log('========================================');
