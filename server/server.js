@@ -344,6 +344,7 @@ app.post('/api/update', auth, (req, res) => {
   }
 
   state.bot.online     = true;
+  state.bot.source     = 'ea';
   state.bot.lastUpdate = Date.now();
 
   // Throttle disk writes (every ~10s) — handled by the interval below
@@ -378,6 +379,140 @@ function pushCandle(c) {
   }
 }
 
+// ---------- demo data generator (SIM mode) ----------
+// When SIM_MODE=on, the server fabricates live-looking candles + positions
+// so the dashboard animates without a connected EA. Turned off when the real
+// EA starts pushing data (detected via /api/update).
+const SIM_MODE = (process.env.SIM_MODE || '').toLowerCase() === 'on';
+let simLastPush = 0;
+let simPrice = 1.08500;            // starting EURUSD price
+let simDir = 1;                    // +1 up, -1 down
+const SIM_SYMBOL = process.env.SIM_SYMBOL || 'EURUSD';
+
+function simStep() {
+  if (!SIM_MODE) return;
+
+  // If a real EA pushed recently, stay quiet (don't fight it).
+  // SIM marks lastUpdate with a sentinel so it never trips its own guard.
+  if (state.bot.online && state.bot.source === 'ea' &&
+      Date.now() - state.bot.lastUpdate < 30000) return;
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  const barLen = 60;               // 1-minute candles
+  const bucket = Math.floor(nowSec / barLen) * barLen;
+
+  // Random-walk the price with mild momentum
+  const drift = (Math.random() - 0.5) * 0.00040;
+  simPrice = Math.max(0.5, simPrice + drift + simDir * 0.00005);
+  if (Math.random() < 0.08) simDir *= -1;   // occasional reversal
+
+  const last = state.candles[state.candles.length - 1];
+  let candle;
+  if (last && last.time === bucket) {
+    candle = last;
+    candle.high = Math.max(candle.high, simPrice);
+    candle.low  = Math.min(candle.low,  simPrice);
+    candle.close = simPrice;
+    candle.volume = (candle.volume || 0) + Math.floor(Math.random() * 50);
+  } else {
+    candle = {
+      time: bucket,
+      open:  last ? last.close : simPrice,
+      high:  simPrice,
+      low:   simPrice,
+      close: simPrice,
+      volume: Math.floor(Math.random() * 100)
+    };
+    state.candles.push(candle);
+    if (state.candles.length > 500) state.candles.shift();
+  }
+
+  // Mark the bot as online (SIM source)
+  state.bot = {
+    name: 'W Forex Hedge Scalper (SIM)',
+    symbol: SIM_SYMBOL,
+    online: true,
+    source: 'sim',
+    lastUpdate: Date.now(),
+    uptime: (state.bot.uptime || 0) + 2
+  };
+
+  // Occasionally open/close demo positions so the "Open Positions" panel animates
+  if (Math.random() < 0.25 && state.positions.length < 6) {
+    const isBuy = Math.random() < 0.5;
+    const entry = simPrice;
+    const lot   = [0.01, 0.02, 0.05][Math.floor(Math.random()*3)];
+    state.positions.push({
+      ticket: 100000 + Math.floor(Math.random()*899999),
+      symbol: SIM_SYMBOL,
+      type: isBuy ? 'buy' : 'sell',
+      lots: lot,
+      open: entry,
+      current: simPrice,
+      sl: isBuy ? entry - 0.0015 : entry + 0.0015,
+      tp: isBuy ? entry + 0.0010 : entry - 0.0010,
+      profit: (isBuy ? (simPrice - entry) : (entry - simPrice)) * lot * 100000,
+      tag: ['Trend','Range','Spike'][Math.floor(Math.random()*3)],
+      time: Date.now()
+    });
+  }
+  // occasionally close a profitable position → record into history
+  for (let i = state.positions.length - 1; i >= 0; i--) {
+    const p = state.positions[i];
+    // simulate price moving toward TP/SL with mild randomness
+    if (p.type === 'buy') p.current = simPrice;
+    else p.current = simPrice;
+    p.profit = (p.type === 'buy' ? (p.current - p.open) : (p.open - p.current)) * p.lots * 100000;
+    if (p.profit > 1.8 || p.profit < -4 || Math.random() < 0.04) {
+      const closed = state.positions.splice(i, 1)[0];
+      state.history.unshift({
+        ticket: closed.ticket,
+        symbol: closed.symbol,
+        type: closed.type,
+        lots: closed.lots,
+        profit: closed.profit,
+        time: Date.now()
+      });
+      if (state.history.length > 200) state.history.length = 200;
+    }
+  }
+
+  // Rolling account stats derived from open positions
+  const openProfit = state.positions.reduce((s,p) => s + p.profit, 0);
+  const baseBalance = 10000;
+  state.account = {
+    balance: baseBalance,
+    equity: baseBalance + openProfit,
+    profit: openProfit,
+    margin: 50,
+    freeMargin: baseBalance + openProfit - 50,
+    marginLevel: ((baseBalance + openProfit) / 50) * 100,
+    leverage: 500,
+    login: 9999999,
+    server: 'SIM-Demo',
+    currency: 'USD',
+    startBalance: baseBalance,
+    dayStartEquity: baseBalance
+  };
+
+  const wins = state.history.filter(h => h.profit > 0).length;
+  state.stats = {
+    openPositions: state.positions.length,
+    totalTrades: state.history.length,
+    wins,
+    losses: state.history.length - wins,
+    winRate: state.history.length ? (wins / state.history.length) * 100 : 0,
+    todayProfit: state.history.reduce((s,h)=>s+h.profit,0),
+    grossProfit: state.history.filter(h=>h.profit>0).reduce((s,h)=>s+h.profit,0),
+    grossLoss: Math.abs(state.history.filter(h=>h.profit<0).reduce((s,h)=>s+h.profit,0)),
+    profitFactor: 0
+  };
+  const gp = state.stats.grossProfit, gl = state.stats.grossLoss;
+  state.stats.profitFactor = gl > 0 ? gp/gl : (gp > 0 ? 99 : 0);
+
+  simLastPush = Date.now();
+}
+
 // ---------- heartbeat (EA confirms it's alive) ----------
 app.post('/api/heartbeat', auth, (req, res) => {
   state.bot.online     = true;
@@ -402,6 +537,14 @@ app.get('*', authLib.requireAuth, (req, res) => {
 
 // ---------- periodic persistence ----------
 setInterval(persist, 10000);
+
+// ---------- SIM data generator tick ----------
+if (SIM_MODE) {
+  // seed initial history so the chart isn't empty on first load
+  simStep();
+  setInterval(simStep, 2000);
+  console.log('  → SIM_MODE: ON (fabricating demo candles/positions every 2s)');
+}
 
 app.listen(PORT, () => {
   // First-run: ensure a demo account exists for testing

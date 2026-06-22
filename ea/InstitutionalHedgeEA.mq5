@@ -135,6 +135,7 @@ input string DashboardURL           = "https://w-forex-dashboard.onrender.com"; 
 input string DashboardToken         = "WFOREX_SECRET_2026";   // must match AUTH_TOKEN on server
 input int    DashboardPushSec       = 5;             // seconds between pushes (min 2)
 input int    DashboardMode          = 1;             // 0=off, 1=on. For quick disable
+input int    DashboardHistoryBars   = 200;           // how many recent candles to push (0=current bar only)
 
 //================ GLOBALS =================
 int      atrH, adxH, emaF_H, emaS_H, rsiH, csvH = INVALID_HANDLE;
@@ -776,21 +777,35 @@ string DashboardBuildPayload()
    }
    posArr = "[" + posArr + "]";
 
-   // Latest candle (the chart symbol)
+   // Latest candle (the chart symbol) + recent history (up to 200 bars)
    string candle = "{}";
+   string candleHistory = "[]";
    if(SeriesInfoInteger(_Symbol,_Period,SERIES_BARS_COUNT) > 0)
    {
-      double o = iOpen(_Symbol,_Period,0);
-      double h = iHigh(_Symbol,_Period,0);
-      double l = iLow(_Symbol,_Period,0);
-      double c = iClose(_Symbol,_Period,0);
-      long   t = (long)iTime(_Symbol,_Period,0);
       int dg = (int)SymbolInfoInteger(_Symbol,SYMBOL_DIGITS);
-      candle = "{\"time\":"+IntegerToString(t)
+      int barsAvail = (int)SeriesInfoInteger(_Symbol,_Period,SERIES_BARS_COUNT);
+      int histCount = (int)MathMin(DashboardHistoryBars, MathMax(0, barsAvail-1));
+      string hist = "";
+      // oldest -> newest; index 0 = current forming bar, so iterate descending
+      for(int b = histCount; b >= 0; b--)
+      {
+         double o = iOpen(_Symbol,_Period,b);
+         double h = iHigh(_Symbol,_Period,b);
+         double l = iLow(_Symbol,_Period,b);
+         double c = iClose(_Symbol,_Period,b);
+         long   t = (long)iTime(_Symbol,_Period,b);
+         long vol = (long)iVolume(_Symbol,_Period,b);
+         string oneCandle = "{\"time\":"+IntegerToString(t)
              + ",\"open\":"+DoubleToString(o,dg)
              + ",\"high\":"+DoubleToString(h,dg)
              + ",\"low\":"+DoubleToString(l,dg)
-             + ",\"close\":"+DoubleToString(c,dg)+"}";
+             + ",\"close\":"+DoubleToString(c,dg)
+             + ",\"volume\":"+IntegerToString(vol)+"}";
+         if(hist != "") hist += ",";
+         hist += oneCandle;
+         if(b == 0) candle = oneCandle; // also keep the latest (forming) bar
+      }
+      candleHistory = "[" + hist + "]";
    }
 
    // Regime / strategy names
@@ -825,8 +840,9 @@ string DashboardBuildPayload()
    body += "},";
    // positions
    body += "\"positions\":"+posArr+",";
-   // candle
+   // candle (latest, forming bar) + full candle history
    body += "\"candle\":"+candle+",";
+   body += "\"candles\":"+candleHistory+",";
    // stats block
    body += "\"stats\":{";
    body +=   "\"openPositions\":"+IntegerToString(total)+",";
