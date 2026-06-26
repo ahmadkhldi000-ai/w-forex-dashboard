@@ -37,8 +37,10 @@ const SIM_MODE        = (process.env.SIM_MODE || '').toLowerCase() === 'on';
 const GOOGLE_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID || '';
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
 const GOOGLE_REDIRECT_URI  = process.env.GOOGLE_REDIRECT_URI || `http://localhost:${PORT}/api/auth/google/callback`;
-const BOT_TOKEN       = process.env.TELEGRAM_BOT_TOKEN || '';
+const BOT_TOKEN       = process.env.TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_TOKEN || '';
 const CHANNEL_USERNAME = process.env.TELEGRAM_CHANNEL_USERNAME || 'wforexvip';
+const TELEGRAM_CHAT   = process.env.TELEGRAM_CHAT || '';
+const TELEGRAM_API     = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : '';
 const AUTH_TOKEN      = process.env.AUTH_TOKEN || 'WFOREX_SECRET';
 const SESSION_SECRET  = process.env.SESSION_SECRET || AUTH_TOKEN;
 const DATA_FILE       = path.join(__dirname, 'data.json');
@@ -545,6 +547,31 @@ app.get('/api/ea/trades', (req, res) => {
   res.json({ ok: true, trades: data.trades });
 });
 
+// GET /api/positions — alias for frontend compatibility
+app.get('/api/positions', (req, res) => {
+  res.json({ ok: true, positions: data.trades || [] });
+});
+
+// GET /api/telegram — alias for /api/telegram/posts
+app.get('/api/telegram', async (req, res) => {
+  try {
+    const tgRes = await fetch(`${TELEGRAM_API}/getUpdates?offset=-1&limit=10&allowed_updates=["message"]`);
+    const json = await tgRes.json();
+    const messages = (json.ok ? json.result : [])
+      .filter(u => u.message && u.message.chat.id == TELEGRAM_CHAT)
+      .map(u => ({
+        id: u.update_id,
+        date: u.message.date,
+        text: u.message.text || (u.message.caption || ''),
+        from: u.message.from ? (u.message.from.first_name || '') : '',
+      }))
+      .reverse();
+    res.json({ ok: true, messages });
+  } catch {
+    res.json({ ok: true, messages: [] });
+  }
+});
+
 // GET /api/ea/account — return account info
 app.get('/api/ea/account', (req, res) => {
   res.json({ ok: true, account: data.account });
@@ -994,6 +1021,29 @@ app.get('/', (req, res) => {
       </body></html>
     `);
   }
+});
+
+// Serve login page at /login
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'login.html'));
+});
+
+// Serve mobile-friendly page at /m
+app.get('/m', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'm.html'));
+});
+
+// Combined stats endpoint (convenience)
+app.get('/api/stats', (req, res) => {
+  res.json({
+    ok: true,
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    simMode: SIM_MODE,
+    clients: sseClients.size,
+    positions: currentPositions.length,
+    trades: allTrades.length,
+  });
 });
 
 // 404 handler
