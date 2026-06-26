@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>W Forex VIP — Mobile App</title>
+  <link rel="icon" type="image/svg+xml" href="../server/public/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../server/public/style.css">
+  <style>
+    /* Mobile App Styles */
+    .mobile-app {
+      max-width: 420px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+
+    .app-header {
+      padding: 20px;
+      background: #111827;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    .app-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffd700;
+    }
+
+    .app-subtitle {
+      font-size: 14px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .tab-container {
+      position: sticky;
+      top: 0;
+      background: #0a0e17;
+      border-bottom: 1px solid #1f2937;
+      z-index: 100;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+    }
+
+    .tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      background: #1f2937;
+    }
+
+    .tab-icon {
+      font-size: 24px;
+    }
+
+    .tab-label {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .tab.active .tab-label {
+      color: #ffd700;
+      font-weight: 600;
+    }
+
+    .tab-content {
+      padding: 16px;
+      min-height: calc(100vh - 120px);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: #1f2937;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid #374151;
+    }
+
+    .card-title {
+      font-size: 14px;
+      color: #9ca3af;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .card-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffd700;
+    }
+
+    .card-unit {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .chart-container {
+      background: #111827;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #374151;
+    }
+
+    .table-container {
+      background: #1f2937;
+      border-radius: 12px;
+      border: 1px solid #374151;
+      overflow: hidden;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th {
+      background: #111827;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      color: #ffd700;
+      border-bottom: 1px solid #374151;
+    }
+
+    .table td {
+      padding: 12px;
+      border-bottom: 1px solid #374151;
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table tr:hover {
+      background: #111827;
+    }
+
+    .buy {
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .sell {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    .profit-positive {
+      color: #10b981;
+      font-weight: 700;
+    }
+
+    .profit-negative {
+      color: #ef4444;
+      font-weight: 700;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 32px;
+      color: #9ca3af;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: #9ca3af;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .button {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #374151;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .info-value {
+      font-size: 14px;
+      color: #f9fafb;
+      font-weight: 600;
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #374151;
+    }
+
+    .status-item:last-child {
+      border-bottom: none;
+    }
+
+    .status-label {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .status-value {
+      font-size: 14px;
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .news-item {
+      padding: 16px;
+      background: #1f2937;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid #374151;
+    }
+
+    .news-item-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .news-item-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f9fafb;
+      margin-bottom: 4px;
+    }
+
+    .news-item-desc {
+      font-size: 14px;
+      color: #9ca3af;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .news-item-time {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .footer {
+      padding: 20px;
+      text-align: center;
+      background: #111827;
+      border-top: 1px solid #374151;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-app">
+    <!-- Header -->
+    <div class="app-header">
+      <div class="app-title">W Forex VIP</div>
+      <div class="app-subtitle">Smart Trading Bot</div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-container">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('home')">
+          <span class="tab-icon">🏠</span>
+          <span class="tab-label">Home</span>
+        </div>
+        <div class="tab" onclick="switchTab('charts')">
+          <span class="tab-icon">📈</span>
+          <span class="tab-label">Charts</span>
+        </div>
+        <div class="tab" onclick="switchTab('news')">
+          <span class="tab-icon">📰</span>
+          <span class="tab-label">News</span>
+        </div>
+        <div class="tab" onclick="switchTab('info')">
+          <span class="tab-icon">ℹ️</span>
+          <span class="tab-label">Info</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Home Tab -->
+    <div id="home" class="tab-content">
+      <div class="tab-pane active">
+        <!-- Gold Price Card -->
+        <div class="card">
+          <div class="card-title">XAU/USD Gold Price</div>
+          <div class="card-value" id="gold-price">--</div>
+          <div class="card-unit">USD</div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-title" style="font-size: 11px;">Active Trades</div>
+            <div class="card-value" id="active-trades" style="font-size: 24px;">--</div>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-title" style="font-size: 11px;">Total Profit</div>
+            <div class="card-value" id="total-profit" style="font-size: 24px;">--</div>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-title" style="font-size: 11px;">Positions</div>
+            <div class="card-value" id="total-positions" style="font-size: 24px;">--</div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-container">
+          <div class="card-title">Gold Chart</div>
+          <div id="chart-container" style="height: 200px; display: flex; align-items: center; justify-content: center; color: #9ca3af;">
+            Loading chart...
+          </div>
+        </div>
+
+        <!-- Positions Table -->
+        <div class="table-container">
+          <div class="card-title">Open Positions</div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Volume</th>
+                <th>Price</th>
+                <th>Profit</th>
+              </tr>
+            </thead>
+            <tbody id="positions-body">
+              <tr>
+                <td colspan="5" class="loading">Loading positions...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Telegram Button -->
+        <a href="https://t.me/wforex_vip" target="_blank" class="button">
+          ✈️ Join W Forex VIP Channel
+        </a>
+      </div>
+    </div>
+
+    <!-- Charts Tab -->
+    <div id="charts" class="tab-content">
+      <div class="tab-pane">
+        <div class="card">
+          <div class="card-title">Current Price</div>
+          <div class="card-value" id="chart-price">--</div>
+          <div class="card-unit">USD</div>
+          <div class="card-title" style="margin-top: 16px;">Price History (Last 30 points)</div>
+        </div>
+        <div class="chart-container">
+          <div id="price-history" style="height: 300px; display: flex; align-items: center; justify-content: center; color: #9ca3af;">
+            Loading history...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- News Tab -->
+    <div id="news" class="tab-content">
+      <div class="tab-pane">
+        <div class="card-title">Market News</div>
+        <div id="news-container">
+          <div class="news-item">
+            <div class="news-item-icon">📰</div>
+            <div class="news-item-title">Gold Prices Surge to New Highs</div>
+            <div class="news-item-desc">XAU/USD hits record levels amid global uncertainty.</div>
+            <div class="news-item-time">2 hours ago</div>
+          </div>
+          <div class="news-item">
+            <div class="news-item-icon">📰</div>
+            <div class="news-item-title">Fed Rate Decision Impact</div>
+            <div class="news-item-desc">Central bank policy affects gold trading strategies.</div>
+            <div class="news-item-time">5 hours ago</div>
+          </div>
+          <div class="news-item">
+            <div class="news-item-icon">📰</div>
+            <div class="news-item-title">Market Volatility Analysis</div>
+            <div class="news-item-desc">Understanding risk management in volatile conditions.</div>
+            <div class="news-item-time">1 day ago</div>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="footer-text">All news from <span style="color: #229ed9; font-weight: 600;">W Forex VIP</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Tab -->
+    <div id="info" class="tab-content">
+      <div class="tab-pane">
+        <div class="card">
+          <div class="card-title">System Status</div>
+          <div class="status-item">
+            <div class="status-label">Server</div>
+            <div class="status-value">Online ✓</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Data Feed</div>
+            <div class="status-value">Active ✓</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Telegram</div>
+            <div class="status-value">Connected ✓</div>
+          </div>
+        </div>
+
+        <div class="card-title">Technical Details</div>
+        <div class="info-row">
+          <div class="info-label">Platform</div>
+          <div class="info-value">MetaTrader 5</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Strategy</div>
+          <div class="info-value">Smart Grid</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Max Trades</div>
+          <div class="info-value">15 positions</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Dashboard URL</div>
+          <div class="info-value">http://localhost:3000</div>
+        </div>
+
+        <a href="https://t.me/wforex_vip" target="_blank" class="button">Join W Forex VIP Channel</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-pane').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      // Show selected tab
+      document.getElementById(tabId).classList.add('active');
+      // Update tab buttons
+      document.querySelectorAll('.tab').forEach((tab, index) => {
+        const tabNames = ['home', 'charts', 'news', 'info'];
+        if (tabNames[index] === tabId) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+    }
+
+    // Fetch Data
+    async function fetchData() {
+      try {
+        // Fetch Gold Price
+        const priceResponse = await fetch('http://localhost:3000/api/gold-price');
+        const priceData = await priceResponse.json();
+        document.getElementById('gold-price').textContent = priceData.price.toFixed(2);
+        document.getElementById('chart-price').textContent = priceData.price.toFixed(2);
+
+        // Fetch Positions
+        const positionsResponse = await fetch('http://localhost:3000/api/positions');
+        const positionsData = await positionsResponse.json();
+        updatePositionsTable(positionsData);
+
+        // Update Stats
+        const activeTrades = positionsData.filter(p => !p.closed_at).length;
+        const totalProfit = positionsData.reduce((sum, p) => sum + (p.profit || 0), 0);
+        document.getElementById('active-trades').textContent = activeTrades;
+        document.getElementById('total-profit').textContent = totalProfit.toFixed(2);
+        document.getElementById('total-positions').textContent = positionsData.length;
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    // Update Positions Table
+    function updatePositionsTable(positions) {
+      const tbody = document.getElementById('positions-body');
+      if (positions.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-state">
+              <div class="empty-state-icon">📊</div>
+              No open positions
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = positions.map(pos => `
+        <tr>
+          <td>${pos.symbol}</td>
+          <td class="${pos.type === 'BUY' ? 'buy' : 'sell'}">${pos.type}</td>
+          <td>${pos.volume}</td>
+          <td>${pos.open_price.toFixed(5)}</td>
+          <td class="${pos.profit >= 0 ? 'profit-positive' : 'profit-negative'}">
+            ${pos.profit >= 0 ? '+' : ''}${pos.profit.toFixed(2)}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Initialize
+    fetchData();
+    setInterval(fetchData, 5000);
+  </script>
+</body>
+</html>

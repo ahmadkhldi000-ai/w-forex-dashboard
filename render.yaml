@@ -1,15 +1,11 @@
-# Render Blueprint — one-click deploy for W Forex Dashboard
-# Click: https://render.com/deploy?repo=https://github.com/ahmadkhldi000-ai/w-forex-dashboard
-previewsExpireAfterDays: 1
 services:
   - type: web
-    name: w-forex-dashboard
-    runtime: node
+    name: w-forex-vip-dashboard
+    env: node
+    region: oregon
     plan: free
-    region: frankfurt   # closest to most users; change if needed
-    rootDir: server     # the Node app lives in /server
-    buildCommand: npm install
-    startCommand: node server.js
+    buildCommand: cd server && npm install
+    startCommand: cd server && node server.js
     healthCheckPath: /login
     autoDeploy: true
     envVars:
@@ -17,8 +13,22 @@ services:
         value: production
       - key: COOKIE_SECURE
         value: 'true'
-      # Generate strong random secrets — DO NOT use these in production
+      # Auth token for the MT5 EA
       - key: AUTH_TOKEN
         generateValue: true
+      # Session secret
       - key: SESSION_SECRET
         generateValue: true
+      # Telegram (optional — set in Render dashboard)
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT
+        sync: false
+      # Owner account (optional — set in Render dashboard)
+      - key: OWNER_EMAIL
+        sync: false
+      - key: OWNER_NAME
+        sync: false
+      # SIM mode — keep ON for demo without EA
+      - key: SIM_MODE
+        value: 'on'

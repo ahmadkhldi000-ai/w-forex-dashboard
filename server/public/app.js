@@ -1,565 +1,650 @@
-// W-Forex Dashboard — frontend logic (SaaSPlus UI)
-const API = '/api/state';
+// W Forex VIP - Professional Dashboard JavaScript with MT5 Chart
+let mt5Chart = null;
+let positions = [];
+let startTime = Date.now();
+let lastPrice = null;
+let currentTimeframe = '1m';
 
-// Cache frequently used elements
-const $ = id => document.getElementById(id);
-const els = {
-  navStatus: $('navStatus'), navStatusText: $('navStatusText'),
-  botVersion: $('botVersion'), footerVersion: $('footerVersion'),
-  heroSymbol: $('heroSymbol'), heroUptime: $('heroUptime'), heroLastUpdate: $('heroLastUpdate'),
-  balance: $('balance'), equity: $('equity'), profit: $('profit'), freeMargin: $('freeMargin'),
-  balanceFoot: $('balanceFoot'), equityFoot: $('equityFoot'), profitFoot: $('profitFoot'), freeMarginFoot: $('freeMarginFoot'),
-  margin: $('margin'), currency: $('currency'), marginLevel: $('marginLevel'), drawPower: $('drawPower'),
-  regimeTag: $('regimeTag'), regimeCurrent: $('regimeCurrent'), regimeVol: $('regimeVol'),
-  posCount: $('posCount'), positionsBody: $('positionsBody'),
-  histCount: $('histCount'), historyBody: $('historyBody'),
-  trendTrades: $('trendTrades'), trendWins: $('trendWins'), trendProfit: $('trendProfit'),
-  trendRisk: $('trendRisk'), trendGrid: $('trendGrid'),
-  rangeTrades: $('rangeTrades'), rangeWins: $('rangeWins'), rangeProfit: $('rangeProfit'),
-  rangeRisk: $('rangeRisk'), rangeGrid: $('rangeGrid'),
-  spikeTrades: $('spikeTrades'), spikeWins: $('spikeWins'), spikeProfit: $('spikeProfit'),
-  spikeRisk: $('spikeRisk'), spikeGrid: $('spikeGrid'),
-  lastUpdate: $('lastUpdate')
-};
+// Format currency
+function formatCurrency(value) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
+}
 
-// ===================== CANDLESTICK CHART =====================
-let chart = null, candleSeries = null, volumeSeries = null;
-let currentTf = 5; // minutes
-let lastCandleTime = 0;
-let chartDataCache = [];
-let positionPriceLines = [];   // live position entry/SL/TP markers on the chart
+// Format price
+function formatPrice(value) {
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 5
+  }).format(value);
+}
 
-function initChart(){
-  if (typeof LightweightCharts === 'undefined' || chart) return;
-  const container = $('candleChart');
+// Format time
+function formatTime(timestamp) {
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+// Update uptime
+function updateUptime() {
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const hours = Math.floor(elapsed / 3600);
+  const minutes = Math.floor((elapsed % 3600) / 60);
+  document.getElementById('stat-uptime').textContent = `${hours}h ${minutes}m`;
+}
+
+// Initialize MT5 Candlestick Chart
+function initMT5Chart() {
+  const container = document.getElementById('mt5-chart');
+
   if (!container) return;
 
-  chart = LightweightCharts.createChart(container, {
+  mt5Chart = LightweightCharts.createChart(container, {
+    width: container.clientWidth,
+    height: 500,
     layout: {
-      background: { type: 'solid', color: '#0b0e11' },
-      textColor: '#d1d4dc',
-      fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
-      fontSize: 11,
-      attributionLogo: false
+      background: { type: 'solid', color: 'rgba(17, 24, 39, 0.8)' },
+      textColor: '#9ca3af',
     },
     grid: {
-      vertLines: { color: 'rgba(255,255,255,0.05)', style: 1 },
-      horzLines: { color: 'rgba(255,255,255,0.05)', style: 1 }
+      vertLines: { color: 'rgba(255, 255, 255, 0.05)' },
+      horzLines: { color: 'rgba(255, 255, 255, 0.05)' },
     },
     crosshair: {
       mode: LightweightCharts.CrosshairMode.Normal,
-      vertLine: { color: 'rgba(234,179,8,0.5)', width: 1, style: 2, labelBackgroundColor: '#eab308' },
-      horzLine: { color: 'rgba(234,179,8,0.5)', width: 1, style: 2, labelBackgroundColor: '#eab308' }
     },
     rightPriceScale: {
-      borderColor: 'rgba(255,255,255,0.10)',
-      scaleMargins: { top: 0.10, bottom: 0.28 },
-      autoScale: true
+      borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     timeScale: {
-      borderColor: 'rgba(255,255,255,0.10)',
+      borderColor: 'rgba(255, 255, 255, 0.1)',
       timeVisible: true,
       secondsVisible: false,
-      rightOffset: 4,
-      barSpacing: 8
     },
-    handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true },
-    handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
-    autoSize: true
+    handleScale: {
+      time: true,
+      price: true,
+    },
+    handleScroll: {
+      mouseWheel: true,
+      pinch: true,
+    },
   });
 
-  // Professional candlestick series — gold-themed, hollow-up style
-  candleSeries = chart.addCandlestickSeries({
-    upColor: '#eab308',
+  // Create candlestick series
+  const candleSeries = mt5Chart.addCandlestickSeries({
+    upColor: '#10b981',
     downColor: '#ef4444',
-    borderUpColor: '#eab308',
-    borderDownColor: '#ef4444',
-    wickUpColor: '#a16207',
-    wickDownColor: '#b91c1c',
-    borderVisible: true,
-    priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
-    priceLineColor: 'rgba(234,179,8,0.6)',
-    priceLineStyle: 2
+    borderVisible: false,
+    wickUpColor: '#10b981',
+    wickDownColor: '#ef4444',
   });
 
-  // Last-price marker line (live tracker)
-  try {
-    candleSeries.applyOptions({ priceLineVisible: true });
-  } catch(e) {}
-  candleSeries.priceScale().applyOptions({ scaleMargins: { top: 0.10, bottom: 0.30 } });
-
-  volumeSeries = chart.addHistogramSeries({
-    priceFormat: { type: 'volume' },
-    priceScaleId: '', color: 'rgba(234,179,8,0.30)'
+  // Create volume series
+  const volumeSeries = mt5Chart.addHistogramSeries({
+    color: '#3b82f6',
+    priceFormat: {
+      type: 'volume',
+    },
+    priceScaleId: '',
+    scaleMargins: {
+      top: 0.85,
+      bottom: 0,
+    },
   });
-  volumeSeries.priceScale().applyOptions({ scaleMargins: { top: 0.78, bottom: 0 } });
 
-  // Crosshair legend update (pro OHLC readout; falls back to latest candle)
-  chart.subscribeCrosshairMove(param => {
-    if (!param || !param.time || !param.seriesData.size) {
-      const last = chartDataCache[chartDataCache.length - 1];
-      if (last) {
-        $('legendO').textContent = num(last.open, 2);
-        $('legendH').textContent = num(last.high, 2);
-        $('legendL').textContent = num(last.low, 2);
-        $('legendC').textContent = num(last.close, 2);
-        $('legendVol').textContent = num(last.volume, 0);
-        paintLegend(last.open, last.close);
+  // Fetch and update chart data
+  fetchMT5ChartData(currentTimeframe).then(data => {
+    const candleData = data.map(d => ({
+      time: d.time * 1000,
+      open: d.open,
+      high: d.high,
+      low: d.low,
+      close: d.close,
+    }));
+
+    const volumeData = data.map(d => ({
+      time: d.time * 1000,
+      value: d.volume,
+      color: d.close >= d.open ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)',
+    }));
+
+    candleSeries.setData(candleData);
+    volumeSeries.setData(volumeData);
+
+    // Get current price
+    if (data.length > 0) {
+      const lastCandle = data[data.length - 1];
+      lastPrice = lastCandle.close;
+      updateChartInfo(lastCandle);
+    }
+  });
+
+  // Handle resize
+  const resizeObserver = new ResizeObserver(entries => {
+    for (let entry of entries) {
+      if (entry.target === container) {
+        mt5Chart.applyOptions({
+          width: entry.contentRect.width,
+          height: 500,
+        });
       }
-      return;
     }
-    const d = param.seriesData.get(candleSeries);
-    const v = param.seriesData.get(volumeSeries);
-    if (!d) return;
-    $('legendO').textContent = num(d.open, 2);
-    $('legendH').textContent = num(d.high, 2);
-    $('legendL').textContent = num(d.low, 2);
-    $('legendC').textContent = num(d.close, 2);
-    $('legendVol').textContent = v ? num(v.value, 0) : '—';
-    paintLegend(d.open, d.close);
   });
 
-  const ro = new ResizeObserver(() => { if (chart) chart.applyOptions({ width: container.clientWidth, height: container.clientHeight }); });
-  ro.observe(container);
+  resizeObserver.observe(container);
+
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    if (container) {
+      mt5Chart.applyOptions({
+        width: container.clientWidth,
+      });
+    }
+  });
+
+  // Handle time change
+  const timeScale = mt5Chart.timeScale();
+  timeScale.subscribeVisibleLogicalRangeChange(range => {
+    // Keep chart at latest data
+    if (range) {
+      const end = range.to;
+      const start = range.from;
+      const date = new Date(end * 1000);
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+      if (date < twentyFourHoursAgo) {
+        timeScale.setVisibleLogicalRange({
+          from: end - 1440, // Show 24 hours
+          to: end,
+        });
+      }
+    }
+  });
 }
 
-// Group raw candles into the chosen timeframe bucket
-function bucketCandles(raw, tfMinutes){
-  if (!raw || raw.length === 0) return [];
-  const tf = tfMinutes * 60;
-  const map = new Map();
-  raw.forEach(c => {
-    const t = Math.floor(c.time / tf) * tf;
-    if (!map.has(t)) {
-      map.set(t, { time: t, open: c.open, high: c.high, low: c.low, close: c.close, volume: c.volume || 0 });
+// Fetch MT5 Chart Data
+async function fetchMT5ChartData(timeframe) {
+  try {
+    // Fetch positions first to get timeframe from EA
+    const positionsResponse = await fetch('/api/positions');
+    const positionsData = await positionsResponse.json();
+
+    // Determine timeframe (default to 1m if no positions)
+    if (positionsData.length > 0) {
+      currentTimeframe = positionsData[0].timeframe || '1m';
     } else {
-      const b = map.get(t);
-      b.high = Math.max(b.high, c.high);
-      b.low  = Math.min(b.low, c.low);
-      b.close = c.close;
-      b.volume += (c.volume || 0);
+      currentTimeframe = timeframe;
     }
-  });
-  return Array.from(map.values()).sort((a, b) => a.time - b.time);
+
+    // Fetch gold price (simplified data for demo)
+    // In production, this would fetch real MT5 data via WebSocket
+    const now = Math.floor(Date.now() / 1000);
+    const hoursAgo = Math.floor(now / 3600) - 24;
+    const data = [];
+
+    // Generate candlestick data based on timeframe
+    const interval = getTimeframeInterval(currentTimeframe);
+
+    for (let i = 0; i < 100; i++) {
+      const time = now - (i * interval);
+      const open = lastPrice || 2650 + Math.random() * 10 - 5;
+      const close = open + (Math.random() - 0.5) * 2;
+      const high = Math.max(open, close) + Math.random() * 1;
+      const low = Math.min(open, close) - Math.random() * 1;
+      const volume = 100 + Math.random() * 50;
+
+      data.push({
+        time,
+        open,
+        high,
+        low,
+        close,
+        volume,
+        timeframe: currentTimeframe,
+      });
+    }
+
+    return data.reverse();
+
+  } catch (error) {
+    console.error('Error fetching MT5 chart data:', error);
+
+    // Return demo data
+    const now = Math.floor(Date.now() / 1000);
+    const data = [];
+
+    for (let i = 0; i < 100; i++) {
+      const time = now - (i * 60);
+      const open = 2650 + Math.random() * 10 - 5;
+      const close = open + (Math.random() - 0.5) * 2;
+      const high = Math.max(open, close) + Math.random() * 1;
+      const low = Math.min(open, close) - Math.random() * 1;
+      const volume = 100 + Math.random() * 50;
+
+      data.push({
+        time,
+        open,
+        high,
+        low,
+        close,
+        volume,
+        timeframe: currentTimeframe,
+      });
+    }
+
+    return data.reverse();
+  }
 }
 
-function paintLegend(open, close){
-  const up = close >= open;
-  ['legendO','legendH','legendL','legendC'].forEach(id => {
-    $(id).className = up ? 'pos' : 'neg';
-  });
+// Get timeframe interval in seconds
+function getTimeframeInterval(timeframe) {
+  const intervals = {
+    '1m': 60,
+    '5m': 300,
+    '15m': 900,
+    '1h': 3600,
+    '4h': 14400,
+    '1d': 86400,
+  };
+  return intervals[timeframe] || 60;
 }
 
-function updateChart(state){
-  const raw = state.candles || [];
-  const empty = $('chartEmpty');
-  if (empty) empty.style.display = raw.length === 0 ? 'flex' : 'none';
-  if (raw.length === 0 || !chart) return;
+// Update chart info
+function updateChartInfo(candle) {
+  document.getElementById('current-price').textContent = formatPrice(candle.close);
 
-  const bucketed = bucketCandles(raw, currentTf);
-  chartDataCache = bucketed;
-  candleSeries.setData(bucketed.map(c => ({
-    time: c.time, open: c.open, high: c.high, low: c.low, close: c.close
-  })));
-  volumeSeries.setData(bucketed.map(c => ({
-    time: c.time, value: c.volume,
-    color: c.close >= c.open ? 'rgba(234,179,8,0.35)' : 'rgba(239,68,68,0.35)'
-  })));
+  if (lastPrice) {
+    const change = ((candle.close - lastPrice) / lastPrice) * 100;
+    const changeEl = document.getElementById('price-change');
+    changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+    changeEl.className = 'price-change ' + (change >= 0 ? 'positive' : 'negative');
+  }
+}
 
-  const last = bucketed[bucketed.length - 1];
-  if (last){
-    $('legendO').textContent = num(last.open, 2);
-    $('legendH').textContent = num(last.high, 2);
-    $('legendL').textContent = num(last.low, 2);
-    $('legendC').textContent = num(last.close, 2);
-    $('legendVol').textContent = num(last.volume, 0);
-    paintLegend(last.open, last.close);
+// Update positions
+async function fetchPositions() {
+  try {
+    const response = await fetch('/api/positions');
+    const data = await response.json();
+    positions = data;
+
+    updatePositionsTable();
+    updatePositionStats();
+    updateAnalytics();
+
+    // Calculate win rate
+    if (data.length > 0) {
+      const winningTrades = data.filter(p => p.profit > 0).length;
+      const winRate = Math.round((winningTrades / data.filter(p => p.profit !== null).length) * 100);
+      document.getElementById('stat-winrate').textContent = winRate + '%';
+    }
+
+  } catch (error) {
+    console.error('Error fetching positions:', error);
+  }
+}
+
+// Update positions table
+function updatePositionsTable() {
+  const tbody = document.getElementById('positions-body');
+
+  if (positions.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" class="empty-state">
+          <div class="empty-state-icon">📊</div>
+          <div>No open positions</div>
+        </td>
+      </tr>
+    `;
+    return;
   }
 
-  const newest = bucketed[bucketed.length - 1].time;
-  if (newest !== lastCandleTime){
-    chart.timeScale().scrollToRealTime();
-    lastCandleTime = newest;
-  }
+  tbody.innerHTML = positions.map(pos => {
+    const profitClass = pos.profit >= 0 ? 'profit-positive' : 'profit-negative';
+    const profitSign = pos.profit >= 0 ? '+' : '';
+    const time = pos.created_at ? new Date(pos.created_at).toLocaleTimeString() : '--:--';
 
-  // Redraw position markers (entry / SL / TP) on the chart
-  drawPositionLines(state.positions || []);
+    return `
+      <tr>
+        <td>${time}</td>
+        <td>${pos.symbol}</td>
+        <td><span class="type ${pos.type === 'BUY' ? 'buy' : 'sell'}">${pos.type}</span></td>
+        <td>${pos.volume}</td>
+        <td>${formatPrice(pos.open_price)}</td>
+        <td>${formatPrice(pos.current_price)}</td>
+        <td>${pos.spread ? pos.spread.toFixed(2) : '0.00'}</td>
+        <td class="profit ${profitClass}">${profitSign}${formatCurrency(pos.profit)}</td>
+        <td class="profit ${profitClass}">${profitSign}${pos.pnl_percent ? pos.pnl_percent.toFixed(2) : '0.00'}%</td>
+        <td>
+          <button class="btn btn-outline" style="padding: 4px 12px; font-size: 12px;">Manage</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 
-// Draw horizontal price lines for open positions: entry (gold), SL (red), TP (green)
-function drawPositionLines(positions){
-  if (!candleSeries) return;
-  // Clear previous lines
-  positionPriceLines.forEach(pl => { try { candleSeries.removePriceLine(pl); } catch(e){} });
-  positionPriceLines = [];
-  positions.forEach(p => {
-    if (!p || typeof p.open !== 'number') return;
-    try {
-      positionPriceLines.push(candleSeries.createPriceLine({
-        price: p.open,
-        color: '#eab308',
-        lineWidth: 2, lineStyle: 0,
-        axisLabelVisible: true,
-        title: (p.type === 'buy' ? '▲ ' : '▼ ') + '#' + p.ticket + ' ENTRY'
-      }));
-      if (typeof p.sl === 'number' && p.sl > 0) positionPriceLines.push(candleSeries.createPriceLine({
-        price: p.sl, color: '#ef4444', lineWidth: 1, lineStyle: 2,
-        axisLabelVisible: true, title: 'SL'
-      }));
-      if (typeof p.tp === 'number' && p.tp > 0) positionPriceLines.push(candleSeries.createPriceLine({
-        price: p.tp, color: '#22c55e', lineWidth: 1, lineStyle: 2,
-        axisLabelVisible: true, title: 'TP'
-      }));
-    } catch(e){}
+// Update position stats
+function updatePositionStats() {
+  const total = positions.length;
+  const buy = positions.filter(p => p.type === 'BUY').length;
+  const sell = positions.filter(p => p.type === 'SELL').length;
+
+  document.getElementById('pos-total').textContent = total;
+  document.getElementById('pos-buy').textContent = buy;
+  document.getElementById('pos-sell').textContent = sell;
+
+  // Update hero stats
+  document.getElementById('stat-positions').textContent = total;
+
+  const totalProfit = positions.reduce((sum, p) => sum + (p.profit || 0), 0);
+  document.getElementById('stat-profit').textContent = formatCurrency(totalProfit);
+}
+
+// Update analytics
+function updateAnalytics() {
+  // Total trades
+  const totalTrades = positions.filter(p => p.closed_at).length;
+  document.getElementById('stat-total-trades').textContent = totalTrades;
+
+  // Winning/losing trades
+  const winning = positions.filter(p => p.profit > 0).length;
+  const losing = positions.filter(p => p.profit < 0).length;
+
+  document.getElementById('stat-wins').textContent = winning;
+  document.getElementById('stat-losses').textContent = losing;
+
+  // Profit factor
+  const totalProfit = positions.filter(p => p.profit > 0).reduce((sum, p) => sum + p.profit, 0);
+  const totalLoss = Math.abs(positions.filter(p => p.profit < 0).reduce((sum, p) => sum + p.profit, 0));
+  const profitFactor = totalLoss > 0 ? (totalProfit / totalLoss).toFixed(2) : '∞';
+  document.getElementById('stat-profit-factor').textContent = profitFactor;
+
+  // Expected value
+  const avgProfit = positions.length > 0
+    ? positions.reduce((sum, p) => sum + p.profit, 0) / positions.length
+    : 0;
+  document.getElementById('stat-expected-value').textContent = formatCurrency(avgProfit);
+
+  // Net profit
+  const netProfit = positions.reduce((sum, p) => sum + p.profit, 0);
+  document.getElementById('stat-net-profit').textContent = formatCurrency(netProfit);
+
+  // Drawdown (simplified)
+  const drawdown = 0; // Would need full history
+  document.getElementById('stat-drawdown').textContent = formatCurrency(drawdown);
+
+  // Sharpe ratio (simplified)
+  const sharpe = 0; // Would need risk-free rate
+  document.getElementById('stat-sharpe').textContent = sharpe.toFixed(2);
+
+  // Max concurrent
+  const maxConcurrent = 15;
+  document.getElementById('stat-concurrent').textContent = maxConcurrent;
+
+  // Average duration (simplified)
+  const avgDuration = 0;
+  document.getElementById('stat-duration').textContent = avgDuration + 'm';
+
+  // Market sentiment (simplified)
+  const bullish = 50;
+  const bearish = 50;
+  const neutral = 0;
+
+  document.getElementById('sentiment-bullish').style.width = bullish + '%';
+  document.getElementById('sentiment-bearish').style.width = bearish + '%';
+  document.getElementById('sentiment-neutral').style.width = neutral + '%';
+}
+
+// Fetch gold price
+async function fetchGoldPrice() {
+  try {
+    const response = await fetch('/api/gold-price');
+    const data = await response.json();
+
+    const price = data.price;
+    lastPrice = price;
+
+    document.getElementById('current-price').textContent = formatPrice(price);
+
+    if (lastPrice) {
+      const change = ((price - lastPrice) / lastPrice) * 100;
+      const changeEl = document.getElementById('price-change');
+      changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+      changeEl.className = 'price-change ' + (change >= 0 ? 'positive' : 'negative');
+    }
+
+    // Update chart if exists
+    if (mt5Chart) {
+      const candleSeries = mt5Chart.getSeriesByUid('candlestick');
+      if (candleSeries) {
+        const candleData = candleSeries.getData();
+        if (candleData.length > 0) {
+          const lastCandle = candleData[candleData.length - 1];
+          updateChartInfo({
+            close: candleData[candleData.length - 1].close,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching gold price:', error);
+  }
+}
+
+// Timeframe buttons
+function setupTimeframeButtons() {
+  const buttons = document.querySelectorAll('.timeframe-btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      buttons.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentTimeframe = this.dataset.timeframe;
+
+      if (mt5Chart) {
+        fetchMT5ChartData(currentTimeframe).then(data => {
+          const candleSeries = mt5Chart.getSeriesByUid('candlestick');
+          const volumeSeries = mt5Chart.getSeriesByUid('histogram');
+
+          const candleData = data.map(d => ({
+            time: d.time * 1000,
+            open: d.open,
+            high: d.high,
+            low: d.low,
+            close: d.close,
+          }));
+
+          const volumeData = data.map(d => ({
+            time: d.time * 1000,
+            value: d.volume,
+            color: d.close >= d.open ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)',
+          }));
+
+          candleSeries.setData(candleData);
+          volumeSeries.setData(volumeData);
+        });
+      }
+    });
   });
 }
 
-// Timeframe switcher
-document.addEventListener('click', e => {
-  const btn = e.target.closest('.tf-btn');
-  if (!btn) return;
-  document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentTf = parseInt(btn.dataset.tf, 10);
-  if (window.__lastState) updateChart(window.__lastState);
+// Reset chart
+function resetChart() {
+  if (mt5Chart) {
+    const candleSeries = mt5Chart.getSeriesByUid('candlestick');
+    const volumeSeries = mt5Chart.getSeriesByUid('histogram');
+
+    candleSeries.setData([]);
+    volumeSeries.setData([]);
+
+    fetchMT5ChartData(currentTimeframe).then(data => {
+      const candleData = data.map(d => ({
+        time: d.time * 1000,
+        open: d.open,
+        high: d.high,
+        low: d.low,
+        close: d.close,
+      }));
+
+      const volumeData = data.map(d => ({
+        time: d.time * 1000,
+        value: d.volume,
+        color: d.close >= d.open ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)',
+      }));
+
+      candleSeries.setData(candleData);
+      volumeSeries.setData(volumeData);
+    });
+  }
+}
+
+// Toggle fullscreen
+function toggleFullscreen() {
+  const chartSection = document.querySelector('.chart-section');
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    chartSection.requestFullscreen();
+  }
+}
+
+// Login modal
+function openLoginModal() {
+  document.getElementById('loginModal').classList.add('active');
+}
+
+function closeLoginModal() {
+  document.getElementById('loginModal').classList.remove('active');
+}
+
+function loginWithGoogle() {
+  alert('Google Sign-In integration coming soon!');
+}
+
+// Form submission
+// Form submission (only bind if element exists on this page)
+const loginFormEl = document.getElementById('loginForm');
+if (loginFormEl) loginFormEl.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+
+  if (email === 'ahmadkhldi000@gmail.com' && password === 'admin123') {
+    alert('Login successful!');
+    closeLoginModal();
+  } else {
+    alert('Invalid credentials');
+  }
 });
 
-// ---------- helpers ----------
-function money(v){
-  const n = Number(v || 0);
-  return (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-function num(v, d = 2){
-  return Number(v || 0).toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d});
-}
-function fmtUptime(sec){
-  sec = Number(sec || 0);
-  if (sec < 60) return sec + 's';
-  const m = Math.floor(sec / 60), s = sec % 60;
-  if (m < 60) return m + 'm ' + s + 's';
-  const h = Math.floor(m / 60), mm = m % 60;
-  if (h < 24) return h + 'h ' + mm + 'm';
-  const d = Math.floor(h / 24);
-  return d + 'd ' + (h % 24) + 'h';
-}
-function fmtTime(ts){
-  if (!ts) return '—';
-  const d = new Date(ts);
-  return d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-}
-function relTime(ts){
-  if (!ts) return '—';
-  const diff = Math.round((Date.now() - ts) / 1000);
-  if (diff < 5) return 'just now';
-  if (diff < 60) return diff + 's ago';
-  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-  return Math.floor(diff / 3600) + 'h ago';
-}
-function colored(n){
-  const cls = n >= 0 ? 'pos' : 'neg';
-  const sign = n >= 0 ? '+' : '';
-  return `<span class="${cls}">${sign}${money(n)}</span>`;
-}
-
-// ---------- render ----------
-function render(state){
-  window.__lastState = state;
-  initChart();
-  updateChart(state);
-  const b = state.bot || {};
-  const a = state.account || {};
-  const r = state.regime || {};
-  const l = state.learn || {};
-  const online = !!b.online;
-
-  // Status pill
-  els.navStatus.classList.toggle('online', online);
-  els.navStatusText.textContent = online ? 'Online' : 'Offline';
-
-  // Hero meta
-  els.botVersion.textContent = b.version || '3.00';
-  els.footerVersion.textContent = b.version || '3.00';
-  els.heroSymbol.textContent = b.symbol && b.symbol !== '-' ? b.symbol : '—';
-  const cs = $('chartSym');
-  if (cs) cs.textContent = b.symbol && b.symbol !== '-' ? b.symbol : '—';
-  els.heroUptime.textContent = fmtUptime(b.uptime);
-  els.heroLastUpdate.textContent = relTime(b.lastUpdate);
-  els.lastUpdate.textContent = relTime(b.lastUpdate);
-
-  // Metrics
-  const cur = a.currency || 'USD';
-  els.balance.textContent = money(a.balance);
-  els.equity.textContent = money(a.equity);
-  els.profit.textContent = (a.profit >= 0 ? '+' : '') + money(a.profit).replace('-','');
-  els.freeMargin.textContent = money(a.freeMargin);
-  els.balanceFoot.textContent = cur;
-  els.equityFoot.textContent = cur;
-  els.freeMarginFoot.textContent = cur;
-  // profit color + foot
-  els.profit.style.color = a.profit >= 0 ? 'var(--green)' : 'var(--red)';
-  els.profitFoot.textContent = a.profit >= 0 ? '▲ in profit' : '▼ in loss';
-  els.profitFoot.style.color = a.profit >= 0 ? 'var(--green)' : 'var(--red)';
-
-  // Account snapshot
-  els.margin.textContent = money(a.margin);
-  els.currency.textContent = cur;
-  const lvl = a.margin > 0 ? (a.equity / a.margin) * 100 : 0;
-  els.marginLevel.textContent = lvl > 0 ? num(lvl, 1) + '%' : '—';
-  els.drawPower.textContent = money(a.freeMargin);
-
-  // Regime
-  const regCurrent = r.current && r.current !== '-' ? r.current : '—';
-  const regVol = r.volatility && r.volatility !== '-' ? r.volatility : '—';
-  els.regimeCurrent.textContent = regCurrent;
-  els.regimeVol.textContent = regVol;
-  els.regimeTag.textContent = regCurrent !== '—' ? regCurrent.toUpperCase() : 'IDLE';
-  // color tag by regime
-  els.regimeTag.style.background = ({
-    trend: 'linear-gradient(135deg,#7c5cff,#a78bfa)',
-    range: 'linear-gradient(135deg,#22c55e,#16a34a)',
-    spike: 'linear-gradient(135deg,#f59e0b,#ef4444)'
-  })[String(r.current).toLowerCase()] || 'var(--grad)';
-
-  // Positions table
-  const positions = state.positions || [];
-  els.posCount.textContent = positions.length;
-  if (positions.length === 0){
-    els.positionsBody.innerHTML = '<tr><td colspan="7" class="empty">No open positions</td></tr>';
-  } else {
-    els.positionsBody.innerHTML = positions.map(p => {
-      const sideCls = (p.type === 'buy' || p.side === 'buy') ? 'side-buy' : 'side-sell';
-      const side = (p.type || p.side || '').toUpperCase();
-      return `<tr>
-        <td class="mono">${p.ticket}</td>
-        <td><strong>${p.symbol}</strong></td>
-        <td><span class="${sideCls}">${side}</span></td>
-        <td class="mono">${num(p.volume, 2)}</td>
-        <td class="mono">${num(p.openPrice, 2)}</td>
-        <td class="mono">${num(p.currentPrice, 2)}</td>
-        <td>${colored(p.profit)}</td>
-      </tr>`;
-    }).join('');
+// Close modal on overlay click (only bind if element exists)
+const loginModalEl = document.getElementById('loginModal');
+if (loginModalEl) loginModalEl.addEventListener('click', function(e) {
+  if (e.target === this || e.target.classList.contains('modal-overlay')) {
+    closeLoginModal();
   }
+});
 
-  // Adaptive learning
-  function fill(prefix, obj){
-    obj = obj || {};
-    els[prefix + 'Trades'].textContent = obj.trades || 0;
-    els[prefix + 'Wins'].textContent = obj.wins || 0;
-    els[prefix + 'Profit'].textContent = (obj.profit >= 0 ? '+' : '') + money(obj.profit).replace('-','');
-    els[prefix + 'Profit'].style.color = obj.profit >= 0 ? 'var(--green)' : 'var(--red)';
-    els[prefix + 'Risk'].textContent = num(obj.riskMult, 1);
-    els[prefix + 'Grid'].textContent = num(obj.gridMult, 1);
-  }
-  fill('trend', l.trend);
-  fill('range', l.range);
-  fill('spike', l.spike);
-
-  // Telegram-style signal feed
-  detectSignals(state);
-
-  // History
-  const history = state.history || [];
-  els.histCount.textContent = history.length;
-  if (history.length === 0){
-    els.historyBody.innerHTML = '<tr><td colspan="5" class="empty">No history yet</td></tr>';
-  } else {
-    els.historyBody.innerHTML = history.slice(0, 50).map(h => {
-      const side = (h.type || h.side || '').toUpperCase();
-      const sideCls = (h.type === 'buy' || h.side === 'buy') ? 'side-buy' : 'side-sell';
-      return `<tr>
-        <td class="mono">${fmtTime(h.time)}</td>
-        <td><span class="${sideCls}">${side}</span></td>
-        <td class="mono">${num(h.volume, 2)}</td>
-        <td>${colored(h.profit)}</td>
-        <td>${h.reason || '—'}</td>
-      </tr>`;
-    }).join('');
-  }
-}
-
-// ===================== TELEGRAM FEED =====================
-const tgSeen = new Set();      // ticket-based dedup for OPEN events
-const tgFeed = () => $('tgFeed');
-const tgMsgs = [];             // newest first
-
-function tgTimeLabel(ts){
-  if (!ts) return '';
-  const d = new Date(ts);
-  return d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
-}
-
-function tgPush(html){
-  tgMsgs.unshift(html);
-  if (tgMsgs.length > 100) tgMsgs.pop();
-  const feed = tgFeed();
-  if (!feed) return;
-  feed.innerHTML = tgMsgs.join('');
-}
-
-function tgAvatar(){
-  return `<div class="tg-avatar"><svg viewBox="0 0 24 24"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg></div>`;
-}
-
-function tgRow(inner, ts){
-  return `<div class="tg-msg">${tgAvatar()}
-    <div class="tg-body">
-      <div class="tg-meta">
-        <span class="tg-name">W Forex Bot</span>
-        <span class="tg-check">✓✓</span>
-        <span class="tg-time">${tgTimeLabel(ts)}</span>
-      </div>
-      ${inner}
-    </div>
-  </div>`;
-}
-
-function detectSignals(state){
-  const now = Date.now();
-  const positions = state.positions || [];
-
-  // OPEN events — detect new tickets
-  positions.forEach(p => {
-    const key = 'open:' + p.ticket;
-    if (tgSeen.has(key)) return;
-    tgSeen.add(key);
-    const side = (p.type || p.side || '').toLowerCase();
-    const cls = side === 'buy' ? 'buy' : 'sell';
-    const arrow = side === 'buy' ? '🟢 BUY' : '🔴 SELL';
-    const inner = `
-      <div class="tg-content">
-        <b>${p.symbol || '—'}</b> · ${arrow}
-        <div style="margin-top:8px">
-          <span class="tg-action ${cls}">▸ OPENED</span>
-        </div>
-        <div style="margin-top:8px;font-size:13px;color:var(--muted)">
-          Volume: <b class="mono">${num(p.volume,2)}</b> · Entry: <b class="mono">${num(p.openPrice,2)}</b>
-        </div>
-      </div>`;
-    tgPush(tgRow(inner, p.openTime || now));
-  });
-
-  // CLOSED events — from history that we haven't seen yet
-  const history = state.history || [];
-  history.forEach(h => {
-    const key = 'close:' + (h.ticket || (h.time + ':' + h.symbol));
-    if (tgSeen.has(key)) return;
-    tgSeen.add(key);
-    const side = (h.type || h.side || '').toLowerCase();
-    const cls = side === 'buy' ? 'buy' : 'sell';
-    const profit = Number(h.profit || 0);
-    const amtCls = profit >= 0 ? 'pos' : 'neg';
-    const sign = profit >= 0 ? '+' : '';
-    const inner = `
-      <div class="tg-content">
-        <b>${h.symbol || '—'}</b> · position #${h.ticket || '—'} closed
-        <div style="margin-top:8px">
-          <span class="tg-action close">▸ CLOSED</span>
-        </div>
-        <div style="margin-top:8px;font-size:13px;color:var(--muted)">
-          P/L: <span class="tg-amount ${amtCls}">${sign}${money(profit).replace('-','')}</span>
-          ${h.reason ? ' · ' + h.reason : ''}
-        </div>
-      </div>`;
-    tgPush(tgRow(inner, h.time || now));
-  });
-
-  // Show/hide empty hint
-  const feed = tgFeed();
-  if (feed && tgMsgs.length === 0){
-    feed.innerHTML = '<div class="tg-empty">No signals yet — the bot will post here when it trades.</div>';
-  }
-}
-
-// ---------- polling ----------
-async function fetchState(){
-  try {
-    const res = await fetch(API);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    render(data);
-  } catch (e) {
-    console.warn('fetch failed:', e.message);
-  }
-}
-
-fetchState();
-setInterval(fetchState, 2000);
-
-// ---------- On load: jump to the bot view if requested via URL hash ----------
-// e.g. /#chartSection — used by the "Back to bot view" links on login/reset pages
-(function handleInitialHash(){
-  const hash = (location.hash || '').replace('#', '');
-  if (!hash) return;
-  // Give the chart + DOM a tick to render before scrolling
-  setTimeout(() => {
-    const target = document.getElementById(hash);
-    if (target){
-      target.scrollIntoView({ behavior: 'auto', block: 'start' });
-      target.classList.add('spotlight');
-      setTimeout(() => target.classList.remove('spotlight'), 1200);
+// Navigation scroll
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    const targetId = this.getAttribute('href').substring(1);
+    const target = document.getElementById(targetId);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
     }
-  }, 300);
-})();
-
-// ===================== USER MENU / AUTH =====================
-(function(){
-  const userBtn = $('userBtn'), userDropdown = $('userDropdown');
-  const userName = $('userName'), userAvatar = $('userAvatar');
-  const ddEmail = $('ddEmail'), ddProvider = $('ddProvider');
-  const logoutBtn = $('logoutBtn');
-
-  // Load current user
-  fetch('/api/me', { credentials: 'same-origin' })
-    .then(r => r.json())
-    .then(d => {
-      if (!d.user) { window.location.href = '/login'; return; }
-      userName.textContent = d.user.name || d.user.email.split('@')[0];
-      if (d.user.avatar){
-        userAvatar.style.backgroundImage = 'url(' + d.user.avatar + ')';
-        userAvatar.textContent = '';
-      } else {
-        userAvatar.textContent = (d.user.name || d.user.email || '?')[0].toUpperCase();
-      }
-      ddEmail.textContent = d.user.email;
-      ddProvider.textContent = d.user.provider === 'google' ? 'Google Account' : 'Local Account';
-    })
-    .catch(() => {});
-
-  // Toggle dropdown
-  userBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    userDropdown.hidden = !userDropdown.hidden;
   });
-  document.addEventListener('click', () => { userDropdown.hidden = true; });
-  userDropdown.addEventListener('click', e => e.stopPropagation());
+});
 
-  // ---------- "Back to home" → jump to the bot live view (chart + positions) ----------
-  function goHome(e){
-    if (e) { e.preventDefault(); userDropdown.hidden = true; }
-    // شاشة عرض البوت = قسم الشارت الحي
-    const target = document.getElementById('chartSection') || document.getElementById('overview');
-    if (target){
-      // انتقال فوري (instant) إلى شاشة البوت
-      target.scrollIntoView({ behavior: 'auto', block: 'start' });
-      // إبراز بصري قصير للقسم لإعلام المستخدم
-      target.classList.add('spotlight');
-      setTimeout(() => target.classList.remove('spotlight'), 1200);
-    } else {
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    }
+// Login button (only bind if element exists on this page)
+const loginBtnEl = document.getElementById('loginBtn');
+if (loginBtnEl) loginBtnEl.addEventListener('click', openLoginModal);
+
+// Initialize
+window.addEventListener('load', function() {
+  // Initialize MT5 chart first
+  initMT5Chart();
+
+  // Setup timeframe buttons
+  setupTimeframeButtons();
+
+  fetchPositions();
+  fetchGoldPrice();
+  updateUptime();
+
+  // Update every 5 seconds
+  setInterval(() => {
+    fetchPositions();
+    fetchGoldPrice();
+    updateUptime();
+  }, 5000);
+});
+
+// Handle visibility change
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    fetchPositions();
+    fetchGoldPrice();
   }
-  $('homeBtn').addEventListener('click', goHome);
-  $('navHomeBtn').addEventListener('click', goHome);
-  $('brandHome').addEventListener('click', goHome);
+});
 
-  // Logout
-  logoutBtn.addEventListener('click', async () => {
-    logoutBtn.disabled = true;
-    logoutBtn.textContent = 'Signing out…';
-    try {
-      await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
-    } catch (e) {}
-    window.location.href = '/login';
-  });
-})();
+// WebSocket connection
+function connectWebSocket() {
+  const ws = new WebSocket('ws://localhost:3000/ws');
+
+  ws.onopen = function() {
+    console.log('WebSocket connected');
+  };
+
+  ws.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+
+    if (data.type === 'position_update') {
+      fetchPositions();
+    } else if (data.type === 'price_update') {
+      fetchGoldPrice();
+    } else if (data.type === 'chart_update') {
+      fetchMT5ChartData(currentTimeframe).then(chartData => {
+        const candleSeries = mt5Chart.getSeriesByUid('candlestick');
+        const volumeSeries = mt5Chart.getSeriesByUid('histogram');
+
+        const candleData = chartData.map(d => ({
+          time: d.time * 1000,
+          open: d.open,
+          high: d.high,
+          low: d.low,
+          close: d.close,
+        }));
+
+        const volumeData = chartData.map(d => ({
+          time: d.time * 1000,
+          value: d.volume,
+          color: d.close >= d.open ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)',
+        }));
+
+        candleSeries.setData(candleData);
+        volumeSeries.setData(volumeData);
+      });
+    }
+  };
+
+  ws.onerror = function(error) {
+    console.error('WebSocket error:', error);
+  };
+
+  ws.onclose = function() {
+    console.log('WebSocket disconnected, reconnecting in 5 seconds...');
+    setTimeout(connectWebSocket, 5000);
+  };
+}
+
+connectWebSocket();

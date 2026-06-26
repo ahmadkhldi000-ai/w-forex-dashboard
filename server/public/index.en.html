@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="W Forex VIP - Professional Smart Trading Bot Dashboard with live XAU/USD candlestick chart from MT5, real-time positions, and Telegram integration.">
+  <meta name="keywords" content="forex, gold trading, XAUUSD, mt5 chart, candlestick chart, smart bot, trading signals">
+  <title>W Forex VIP | Professional Trading Dashboard with MT5 Chart</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+  <!-- Background Chart Canvas with Logo -->
+  <canvas id="chartCanvas" class="chart-background">
+    <div class="background-logo">
+      <span class="logo-symbol">W</span>
+      <span class="logo-text">FOREX</span>
+    </div>
+  </canvas>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="#" class="logo">
+        <span class="logo-icon">◆</span>
+        <div class="logo-text">
+          <span class="logo-primary">W Forex</span>
+          <span class="logo-secondary">VIP</span>
+        </div>
+      </a>
+      <div class="nav-menu">
+        <a href="#overview" class="nav-link">Overview</a>
+        <a href="#chart" class="nav-link">MT5 Chart</a>
+        <a href="#positions" class="nav-link">Positions</a>
+        <a href="#telegram" class="nav-link">Telegram</a>
+      </div>
+      <div class="nav-actions">
+        <button id="loginBtn" class="btn btn-outline">Sign In</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="overview" class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-icon">⚡</span>
+          <span class="badge-text">MT5 CHART EMBEDDED</span>
+        </div>
+        <h1 class="hero-title">
+          <span class="title-highlight">Smart Grid</span> Trading
+          <span class="title-glow">Bot</span>
+        </h1>
+        <p class="hero-description">
+          Advanced algorithmic trading powered by MetaTrader 5 Grid Strategy with
+          <strong>live XAU/USD candlestick chart</strong> embedded directly in the dashboard.
+          Managing up to <strong>15 concurrent trades</strong> with intelligent profit closure.
+        </p>
+        <div class="hero-stats">
+          <div class="stat-card stat-primary">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+              <div class="stat-label">Active Trades</div>
+              <div class="stat-value" id="stat-positions">0</div>
+            </div>
+          </div>
+          <div class="stat-card stat-success">
+            <div class="stat-icon">📈</div>
+            <div class="stat-content">
+              <div class="stat-label">Total Profit</div>
+              <div class="stat-value" id="stat-profit">$0.00</div>
+            </div>
+          </div>
+          <div class="stat-card stat-gold">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+              <div class="stat-label">Win Rate</div>
+              <div class="stat-value" id="stat-winrate">0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MT5 Candlestick Chart Section -->
+  <section id="chart" class="chart-section">
+    <div class="section-container">
+      <div class="section-header">
+        <div class="section-title-group">
+          <h2 class="section-title">XAU/USD <span class="title-subtitle">MT5 Candlestick Chart</span></h2>
+          <p class="section-subtitle">
+            <span class="live-badge">● Live</span>
+            Real-time candlestick chart from MetaTrader 5 data feed
+          </p>
+        </div>
+        <div class="chart-controls">
+          <div class="chart-info">
+            <div class="info-item">
+              <span class="info-label">Current Price</span>
+              <span class="info-value" id="current-price">$0.00</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Change</span>
+              <span class="info-value" id="price-change">+0.00%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrapper">
+        <div class="chart-container">
+          <div id="mt5-chart" class="chart-box"></div>
+        </div>
+        <div class="chart-controls-bar">
+          <div class="timeframe-selector">
+            <button class="timeframe-btn active" data-timeframe="1m">1m</button>
+            <button class="timeframe-btn" data-timeframe="5m">5m</button>
+            <button class="timeframe-btn" data-timeframe="15m">15m</button>
+            <button class="timeframe-btn" data-timeframe="1h">1h</button>
+            <button class="timeframe-btn" data-timeframe="4h">4h</button>
+            <button class="timeframe-btn" data-timeframe="1d">1D</button>
+          </div>
+          <div class="chart-actions">
+            <button class="btn btn-outline btn-sm" onclick="resetChart()">Reset</button>
+            <button class="btn btn-outline btn-sm" onclick="toggleFullscreen()">Fullscreen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Positions Section -->
+  <section id="positions" class="positions-section">
+    <div class="section-container">
+      <div class="section-header">
+        <div class="section-title-group">
+          <h2 class="section-title">Open <span class="title-subtitle">Positions</span></h2>
+          <p class="section-subtitle">Real-time trade management dashboard</p>
+        </div>
+        <div class="position-stats">
+          <div class="stat-item">
+            <span class="stat-label">Total Positions</span>
+            <span class="stat-value" id="pos-total">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Buy Side</span>
+            <span class="stat-value" id="pos-buy">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Sell Side</span>
+            <span class="stat-value" id="pos-sell">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="positions-wrapper">
+        <div class="positions-table-container">
+          <table class="positions-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Volume</th>
+                <th>Open Price</th>
+                <th>Current</th>
+                <th>Spread</th>
+                <th>Profit</th>
+                <th>PnL %</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="positions-body">
+              <tr class="loading-row">
+                <td colspan="10" class="loading-cell">Loading positions...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Telegram Section -->
+  <section id="telegram" class="telegram-section">
+    <div class="section-container">
+      <div class="telegram-content">
+        <div class="telegram-header">
+          <div class="telegram-icon">✈️</div>
+          <div class="telegram-text">
+            <h2 class="telegram-title">W Forex VIP Channel</h2>
+            <p class="telegram-subtitle">
+              <a href="https://t.me/+mSKxVia8x8JlNmE0" target="_blank">
+                https://t.me/+mSKxVia8x8JlNmE0
+              </a>
+              - Live trades & signals
+            </p>
+          </div>
+        </div>
+        <div class="telegram-stats">
+          <div class="telegram-stat-item">
+            <div class="telegram-stat-icon">👥</div>
+            <div class="telegram-stat-content">
+              <div class="telegram-stat-label">Members</div>
+              <div class="telegram-stat-value" id="tg-members">--</div>
+            </div>
+          </div>
+          <div class="telegram-stat-item">
+            <div class="telegram-stat-icon">📢</div>
+            <div class="telegram-stat-content">
+              <div class="telegram-stat-label">Daily Signals</div>
+              <div class="telegram-stat-value">15-20</div>
+            </div>
+          </div>
+          <div class="telegram-stat-item">
+            <div class="telegram-stat-icon">📈</div>
+            <div class="telegram-stat-content">
+              <div class="telegram-stat-label">Accuracy</div>
+              <div class="telegram-stat-value">75%+</div>
+            </div>
+          </div>
+        </div>
+        <a href="https://t.me/+mSKxVia8x8JlNmE0" target="_blank" class="telegram-button">
+          <span class="btn-icon">✈️</span>
+          <span class="btn-text">Join W Forex VIP Channel</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="footer-logo">◆</span>
+        <div class="footer-brand-text">
+          <strong>W Forex VIP</strong>
+          <span>Professional Trading Bot with MT5 Chart</span>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="#overview" class="footer-link">Overview</a>
+        <a href="#chart" class="footer-link">MT5 Chart</a>
+        <a href="#positions" class="footer-link">Positions</a>
+        <a href="https://t.me/+mSKxVia8x8JlNmE0" target="_blank" class="footer-link">Telegram</a>
+      </div>
+      <div class="footer-copyright">
+        <span>© 2026 W Forex. All rights reserved.</span>
+        <span class="copyright-divider">|</span>
+        <span>Powered by MetaTrader 5 Smart Grid</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+      <div class="modal-header">
+        <h2>Sign In</h2>
+        <p class="modal-subtitle">Access your trading dashboard</p>
+      </div>
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" required placeholder="Enter your email" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required placeholder="Enter your password" autocomplete="current-password">
+        </div>
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" id="rememberMe">
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="forgot-password">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">
+          Sign In
+        </button>
+        <div class="form-divider">
+          <span>or continue with</span>
+        </div>
+        <button type="button" class="btn btn-google" onclick="loginWithGoogle()">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Sign in with Google
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0b0e14">
+  <title>W Forex · تطبيق الهاتف</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg: #0b0e14; --card: #141925; --card2: #1a2030; --border: #222a3a;
+      --text: #e8ecf4; --dim: #8a93a6; --gold: #f0b90b; --gold2: #eab308;
+      --green: #16c784; --red: #ea3943; --blue: #3b82f6;
+    }
+    html, body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Cairo', -apple-system, 'Segoe UI', Tahoma, sans-serif;
+      min-height: 100vh; min-height: 100dvh;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    #app { max-width: 520px; margin: 0 auto; padding: 12px 14px 30px; }
+    .skeleton { color: var(--dim); text-align: center; padding: 60px 0; font-size: 15px; }
+    .skeleton .spin {
+      display: inline-block; width: 28px; height: 28px;
+      border: 3px solid var(--border); border-top-color: var(--gold);
+      border-radius: 50%; animation: sp 0.8s linear infinite; margin-bottom: 12px;
+    }
+    @keyframes sp { to { transform: rotate(360deg); } }
+
+    /* Header */
+    .hdr { display: flex; align-items: center; justify-content: space-between;
+           padding: 10px 4px 14px; position: sticky; top: 0; background: var(--bg); z-index: 10; }
+    .hdr-l { display: flex; align-items: center; gap: 10px; }
+    .logo { width: 38px; height: 38px; border-radius: 10px; background: var(--gold);
+            display: grid; place-items: center; color: #0b0e14; font-weight: 900; font-size: 20px; }
+    .brand { font-weight: 800; font-size: 17px; }
+    .brand small { display: block; font-weight: 500; font-size: 11px; color: var(--dim); }
+    .pill { display: flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 20px;
+            font-size: 12px; font-weight: 700; color: #0b0e14; }
+    .pill.on { background: var(--green); }
+    .pill.off { background: var(--red); }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #0b0e14; }
+
+    /* Price */
+    .price { background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+             padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .price-l .lbl { font-size: 12px; color: var(--dim); }
+    .price-l .val { font-size: 30px; font-weight: 800; color: var(--gold); margin-top: 2px; }
+    .tag { font-size: 10px; padding: 2px 8px; border-radius: 6px; background: var(--card2); color: var(--dim); margin-right: 6px; }
+    .spark { display: flex; align-items: flex-end; gap: 2px; height: 38px; }
+    .spark i { width: 3px; border-radius: 2px; display: block; }
+
+    /* Balance */
+    .bal { background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+           padding: 18px; text-align: center; margin-bottom: 12px; }
+    .bal .lbl { font-size: 12px; color: var(--dim); }
+    .bal .val { font-size: 32px; font-weight: 800; margin: 4px 0; }
+    .bal-r { display: flex; justify-content: space-around; margin-top: 10px; }
+    .bal-i { text-align: center; }
+    .bal-i .k { font-size: 10px; color: var(--dim); }
+    .bal-i .v { font-size: 13px; font-weight: 700; margin-top: 2px; }
+
+    /* Stats grid */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .scard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 13px; }
+    .scard .h { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dim); margin-bottom: 7px; }
+    .scard .v { font-size: 19px; font-weight: 800; }
+
+    /* Section */
+    .sec-t { font-size: 15px; font-weight: 700; margin: 14px 0 8px; display: flex; align-items: center; gap: 6px; }
+    .sec-t span { color: var(--gold); }
+    .sec { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 14px; }
+    .empty { color: var(--dim); font-size: 13px; text-align: center; padding: 24px; }
+    .row { display: flex; justify-content: space-between; align-items: center;
+           padding: 13px 14px; border-bottom: 1px solid var(--border); border-left: 3px solid var(--border); }
+    .row:last-child { border-bottom: none; }
+    .row.buy { border-left-color: var(--green); }
+    .row.sell { border-left-color: var(--red); }
+    .row .l .t { font-size: 13px; font-weight: 700; }
+    .row .l .m { font-size: 10px; color: var(--dim); margin-top: 3px; }
+    .row .r { text-align: left; }
+    .row .r .p { font-size: 12px; color: var(--dim); }
+    .row .r .pr { font-size: 14px; font-weight: 800; margin-top: 2px; }
+    .pos { color: var(--green); } .neg { color: var(--red); }
+
+    /* TG button */
+    .tg { display: flex; align-items: center; justify-content: center; gap: 8px;
+          background: var(--blue); color: #fff; padding: 14px; border-radius: 12px;
+          font-weight: 700; font-size: 14px; text-decoration: none; margin-top: 6px; }
+    .foot { color: var(--dim); font-size: 11px; text-align: center; margin-top: 18px; }
+    .err { display: flex; gap: 8px; align-items: center; background: rgba(234,57,67,.12);
+           border: 1px solid var(--red); border-radius: 10px; padding: 11px; margin-bottom: 12px; }
+    .err b { color: var(--red); font-size: 13px; }
+  </style>
+</head>
+<body>
+<div id="app"><div class="skeleton"><div class="spin"></div><br>جاري الاتصال بالخادم…</div></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const app = $('#app');
+let prevPrice = 0;
+
+const fmtMoney = (n, c='USD') => (n==null?'—':Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+c);
+const fmtTime = ms => { if(!ms) return '—'; const d=new Date(ms); return d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}); };
+
+async function poll(){
+  try {
+    const r = await fetch('/api/state', { headers:{Accept:'application/json'} });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    render(d);
+  } catch(e){
+    const sk = $('.skeleton');
+    if(sk){ sk.innerHTML = '<div class="spin"></div><br>تعذّر الاتصال بالخادم'; }
+  }
+}
+
+function render(d){
+  const bot = d.bot||{}, acc = d.account||{}, st = d.stats||{}, pos = d.positions||[], hist = d.history||[];
+  const price = d.price, online = bot.online, sim = bot.source==='sim';
+  const candles = d.candles||[], spark = candles.slice(-30).map(c=>c.close);
+  const priceUp = price>=prevPrice; prevPrice = price||prevPrice;
+
+  const sparkHtml = spark.length>1 ? (()=>{
+    const mn=Math.min(...spark),mx=Math.max(...spark),rg=mx-mn||1,up=spark[spark.length-1]>=spark[0];
+    const col = up?'var(--green)':'var(--red)';
+    return '<div class="spark">'+spark.map(v=>`<i style="height:${4+((v-mn)/rg)*30}px;background:${col}"></i>`).join('')+'</div>';
+  })() : '';
+
+  const posHtml = pos.length ? pos.map(p=>{
+    const buy=p.type==='buy', pr=(p.profit||0), pc=pr>=0?'pos':'neg';
+    return `<div class="row ${buy?'buy':'sell'}"><div class="l"><div class="t">${buy?'▲ شراء':'▼ بيع'} · ${p.symbol||'XAUUSD'}</div><div class="m">${p.lots?p.lots+' لوت':'—'} · ${fmtTime(p.time)}</div></div><div class="r"><div class="p">${p.open?p.open.toFixed(2):'—'}</div><div class="pr ${pc}">${pr>=0?'+':''}${pr.toFixed(2)}</div></div></div>`;
+  }).join('') : '<div class="empty">لا توجد صفقات مفتوحة</div>';
+
+  const histHtml = hist.length ? hist.slice(0,5).map(h=>{
+    const pr=(h.profit||0), pc=pr>=0?'pos':'neg';
+    return `<div class="row" style="border-left-color:${pr>=0?'var(--green)':'var(--red)'};opacity:.85"><div class="l"><div class="t">${h.type==='buy'?'▲':'▼'} · ${h.symbol||'XAUUSD'}</div><div class="m">${fmtTime(h.time)}</div></div><div class="r"><div class="pr ${pc}">${pr>=0?'+':''}${pr.toFixed(2)}</div></div></div>`;
+  }).join('') : '<div class="empty">لا يوجد سجل بعد</div>';
+
+  app.innerHTML = `
+    <div class="hdr">
+      <div class="hdr-l"><div class="logo">W</div><div class="brand">W Forex<small>${bot.name||'SmartGrid'}</small></div></div>
+      <div class="pill ${online?'on':'off'}"><span class="dot"></span>${online?'متصل':'غير متصل'}</div>
+    </div>
+
+    <div class="price">
+      <div class="price-l">
+        <div class="lbl"><span class="tag">${sim?'محاكاة':'مباشر'}</span>${bot.symbol||'XAUUSD'}</div>
+        <div class="val">${price!=null?'$'+price.toFixed(2):'—'}</div>
+      </div>
+      ${sparkHtml}
+    </div>
+
+    <div class="bal">
+      <div class="lbl">صافي الحساب</div>
+      <div class="val">${fmtMoney(acc.equity??acc.balance)}</div>
+      <div class="bal-r">
+        <div class="bal-i"><div class="k">الرصيد</div><div class="v">${fmtMoney(acc.balance)}</div></div>
+        <div class="bal-i"><div class="k">الربح</div><div class="v ${(acc.profit||0)>=0?'pos':'neg'}">${(acc.profit||0)>=0?'+':''}${fmtMoney(acc.profit)}</div></div>
+        <div class="bal-i"><div class="k">المتاح</div><div class="v">${fmtMoney(acc.freeMargin)}</div></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="scard"><div class="h">📈 صفقات اليوم</div><div class="v">${st.dayTrades??0}</div></div>
+      <div class="scard"><div class="h">✅ مكاسب</div><div class="v pos">${st.dayWins??0}</div></div>
+      <div class="scard"><div class="h">🏆 أفضل صفقة</div><div class="v pos">${st.bestTrade!=null?'$'+st.bestTrade.toFixed(2):'—'}</div></div>
+      <div class="scard"><div class="h">⚡ المفتوحة</div><div class="v" style="color:var(--gold)">${pos.length}</div></div>
+    </div>
+
+    <div class="sec-t"><span>💼</span> الصفقات المفتوحة</div>
+    <div class="sec">${posHtml}</div>
+
+    <div class="sec-t"><span>🕑</span> آخر الصفقات المغلقة</div>
+    <div class="sec">${histHtml}</div>
+
+    <a class="tg" href="https://t.me/" target="_blank">📨 قناة W Forex VIP</a>
+    <div class="foot">W Forex v${bot.version||'1.0'} · ${sim?'وضع المحاكاة':'مباشر MT5'}</div>
+  `;
+}
+
+poll();
+setInterval(poll, 5000);
+</script>
+</body>
+</html>

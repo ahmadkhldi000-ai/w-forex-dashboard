@@ -1,0 +1,68 @@
+# W Forex Server — Git Ignore
+# احمِ الملفات الحساسة من الرفع إلى GitHub
+
+# البيئة الحساسة
+.env
+*.log
+tmp/
+temp/
+
+# البيانات المتراكمة
+data.json
+users.json
+resets.json
+
+# التوكنات والأمان
+AUTH_TOKENS.md
+**/AUTH_TOKENS.md
+credentials.json
+
+# التبعيات
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+.next/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# نظام التشغيل
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Expo (mobile)
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Apple (mobile)
+ios/Pods/
+ios/.xcode.env.local
+ios/Podfile.lock
+ios/*.xcworkspace
+!ios/default.xcworkspace
+ios/.generated/
+
+# Android (mobile)
+android/.gradle/
+android/app/build/
+android/app/release/
+android/app/debug/
+android/local.properties
