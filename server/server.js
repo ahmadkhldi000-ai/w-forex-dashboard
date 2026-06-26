@@ -994,6 +994,16 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, uptime: process.uptime(), memory: process.memoryUsage(), simMode: SIM_MODE, clients: sseClients.size });
 });
 
+// Dashboard route — serves the live trading dashboard (English)
+app.get('/dashboard', (req, res) => {
+  const file = path.join(PUBLIC_DIR, 'index.en.html');
+  if (fs.existsSync(file)) {
+    res.sendFile(file);
+  } else {
+    res.redirect('/');
+  }
+});
+
 app.get('/', (req, res) => {
   if (fs.existsSync(path.join(PUBLIC_DIR, 'index.html'))) {
     res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
