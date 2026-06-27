@@ -162,11 +162,11 @@ loadData();
 loadUsers();
 
 // ─── Owner account auto-seed ─────────────────────────────────────────────────
-// Ensures the owner account exists with a known password (set via env).
-// If the account already exists, the password is updated to OWNER_PASSWORD.
-const OWNER_EMAIL    = process.env.OWNER_EMAIL    || '';
-const OWNER_NAME     = process.env.OWNER_NAME     || 'Owner';
-const OWNER_PASSWORD = process.env.OWNER_PASSWORD || '';
+// Ensures the owner account exists with a known password.
+// Defaults work out-of-the-box; override via env (OWNER_PASSWORD) in production.
+const OWNER_EMAIL    = process.env.OWNER_EMAIL    || 'ahmadkhldi000@gmail.com';
+const OWNER_NAME     = process.env.OWNER_NAME     || 'Ahmad Khaldi';
+const OWNER_PASSWORD = process.env.OWNER_PASSWORD || 'Wforex2026!';
 
 function ensureOwnerAccount() {
   if (!OWNER_EMAIL || !OWNER_PASSWORD) {
