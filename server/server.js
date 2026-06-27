@@ -1162,6 +1162,9 @@ app.get('/api/stats', (req, res) => {
     clients: sseClients.size,
     positions: currentPositions.length,
     trades: allTrades.length,
+    userCount: usersDB.users.length,
+    ownerConfigured: !!(OWNER_EMAIL && OWNER_PASSWORD),
+    ownerEmail: OWNER_EMAIL || '(none)',
   });
 });
 
