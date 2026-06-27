@@ -1,221 +1,145 @@
 <div align="center">
 
-# W Forex VIP — Smart Gold Trading System
+# W Forex — Smart Gold Trading System
 
-**نظام تداول ذكي متكامل للذهب** — لوحة تحكم حية + تطبيق موبايل + بوت MT5
-
-[![Node.js](https://img.shields.io/badge/Node.js-19+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
-[![React Native](https://img.shields.io/badge/React_Native-Expo-61DAFB?logo=react&logoColor=black)](https://expo.dev)
-[![MetaTrader 5](https://img.shields.io/badge/MT5-EA-0072C6?logo=metatrader&logoColor=white)](https://www.metatrader5.com)
-[![License](https://img.shields.io/badge/License-Private-CC0000)]()
+**A fully-automated smart-grid trading bot for gold (XAUUSD) on MT5**
+Live web dashboard · MT5 expert advisor · Telegram alerts · Investor pitch deck
 
 </div>
 
 ---
 
-نظام **W Forex VIP** هو منصة تداول ذكية متكاملة تقدم لوحة تحكم احترافية بتصميم شبيه بـ TradingView مع شموع ذهب حية، تطبيق موبايل عبر Expo، وبوتات تداول MQL5 تعمل على MetaTrader 5. يشمل النظام بثّاً حيًا عبر SSE، تسجيل دخول بـ Google OAuth، إشعارات Telegram، ووضع SIM للعرض التوضيحي.
+## What is this?
 
----
+**W Forex** is a complete, transparent gold-trading system:
 
-## Screenshots
+- 🤖 **`W Forex Bot.mq5`** — a MetaTrader 5 expert advisor that trades XAUUSD with a
+  trend-aware smart grid, ATR-based stops, spread protection, a hard drawdown cap and
+  trailing profit. While it trades it **streams the live account, candles, open trades and
+  history to the website** every few seconds, and pushes every open/close to **Telegram**.
+- 🌐 **Web dashboard** (English, professional) — a real-time candlestick chart with a **W
+  logo watermark**, the bot's **live positions drawn directly on the chart** (entry arrows +
+  SL/TP lines), account metrics, positions & history tables, a **Telegram popup** and a
+  **"Go to Telegram"** feature.
+- 🔑 **Google Sign-In** — one-click login, no email/password needed.
+- 📊 **Investor presentation** — a 12-slide pitch deck at `/presentation`.
 
-| Dashboard | Mobile App | MT5 EA |
-|:---:|:---:|:---:|
-| <img src="screenshots/dashboard.png" alt="Dashboard" width="400"/> | <img src="screenshots/mobile.png" alt="Mobile" width="400"/> | <img src="screenshots/mt5-ea.png" alt="MT5 EA" width="400"/> |
-
-> *أضف صورًا حقيقية للمشروع في مجلد `screenshots/`*
-
----
-
-## ✨ Features
-
-### Dashboard (لوحة التحكم)
-- شارت شموع ذهب حية بتصميم TradingView-like
-- بث مباشر للبيانات عبر Server-Sent Events (SSE)
-- محاكاة بيانات ذهب حقيقية من Yahoo Finance
-- تسجيل دخول بـ Google OAuth أو email/password
-- عرض الصفقات المفتوحة والمغلقة والإحصائيات
-- وضع SIM للعرض بدون اتصال بـ EA
-- تصميم عربي RTL متجاوب بالكامل
-
-### Mobile App (تطبيق الهاتف)
-- شاشة Home مع عرض مباشر للسعر والصفقات
-- شاشة Telegram للتواصل والإشعارات
-- شاشة About مع معلومات النظام
-- بنية Expo/React Native مع TypeScript
-
-### Telegram Bot
-- إشعارات فورية للصفقات المفتوحة والمغلقة
-- تنبيهات الأرباح والخسائر
-- تحكم بالبوت عبر الأوامر
-
-### MT5 Expert Advisors
-- **SmartGridEA_MaxTrades** — بوت شبكة ذكي بحد أقصى للصفقات
-- **InstitutionalHedgeEA** — بوت تحوط مؤسسي للذهب
-
----
-
-## 📁 Project Structure
+## Project structure
 
 ```
 W-Forex-FINAL/
-├── server/                          # سيرفر Node.js/Express
-│   ├── server.js                    # نقطة الدخول الرئيسية
-│   ├── .env.example                 # قالب متغيرات البيئة
-│   ├── package.json
-│   └── ...
-├── mobile/                          # تطبيق Expo/React Native
-│   ├── index.js                     # نقطة الدخول
-│   ├── App.js                       # المكون الرئيسي
-│   ├── tsconfig.json
-│   ├── package.json
-│   └── ...
-├── ea/                              # بوتات MetaTrader 5
-│   ├── SmartGridEA_MaxTrades.mq5    # بوت الشبكة الذكي
-│   └── InstitutionalHedgeEA.mq5     # بوت التحوط المؤسسي
-├── render.yaml                      # إعدادات النشر على Render
-├── run_all.sh                        # تشغيل جميع المكونات
-├── package.json                     # إعدادات المشروع الرئيسية
-└── README.md                        # هذا الملف
+├── ea/
+│   ├── W Forex Bot.mq5          ← the dashboard-enabled trading bot (copy this into MT5)
+│   └── (legacy EAs)
+├── server/
+│   ├── server.js                ← Node/Express backend (API + SSE + Google OAuth)
+│   ├── public/
+│   │   ├── index.en.html        ← the professional English dashboard  (served at /)
+│   │   ├── index.ar.html        ← Arabic dashboard  (served at /ar)
+│   │   ├── presentation.html    ← investor pitch deck  (served at /presentation)
+│   │   ├── pro.css / pro.js     ← dashboard styles & logic
+│   │   ├── deck.css / deck.js   ← pitch deck styles & logic
+│   │   └── login.html           ← Google sign-in page  (served at /login)
+│   ├── .env.example             ← environment variables (copy to .env)
+│   └── package.json
+├── scripts/
+│   └── sim-ea.mjs               ← a test simulator that pretends to be the EA
+└── render.yaml                  ← one-click deploy to Render.com
 ```
 
----
-
-## 🚀 Local Development
-
-### المتطلبات
-- Node.js 18+
-- npm أو yarn
-- Expo CLI (للتطبيق)
-- MetaTrader 5 (للبوتات)
-
-### تشغيل السيرفر
+## Quick start (local)
 
 ```bash
 cd server
+cp .env.example .env        # then edit values (see below)
 npm install
-cp .env.example .env    # عدّل المتغيرات حسب الحاجة
-node server.js
+npm start                   # → http://localhost:3000
 ```
 
-السيرفر سيعمل على `http://localhost:3000`
+With `SIM_MODE=on` (default) the dashboard shows **live gold + simulated demo trades**
+so you can see everything working without MT5.
 
-### تشغيل تطبيق الموبايل
+## Connecting your real MT5 account
 
-```bash
-cd mobile
-npm install
-npx expo start
-```
+1. **Copy the EA**: place `ea/W Forex Bot.mq5` into your MT5 `MQL5/Experts/` folder
+   (File → Open Data Folder → `MQL5/Experts`).
+2. **Compile**: open it in MetaEditor and press **F7** → produces `W Forex Bot.ex5`.
+3. **Allow web requests**: in MT5 → **Tools → Options → Expert Advisors**,
+   - tick *“Allow WebRequest for listed URL”*
+   - add: `https://w-forex-dashboard.onrender.com`
+   - add: `https://api.telegram.org`
+4. **Attach to a XAUUSD chart** and enable **Algo Trading**. In the inputs set:
+   - `DashboardURL`   = `https://w-forex-dashboard.onrender.com/api/ea/data`
+   - `DashboardToken` = `WFOREX_SECRET_2026`  (must match the server `AUTH_TOKEN`)
+   - `EnableDashboard` = `true`
 
-> افتح الرابط في Expo Go على هاتفك أو اضغط `a` لـ Android أو `i` لـ iOS
+Within seconds the dashboard lights up **“Live · EA”**, the chart shows your real gold
+candles, and every trade the bot opens appears live on the chart and in the tables.
 
-### تشغيل البوتات MT5
+> The EA also writes `W Forex Bot.mq5` to your **Desktop** so you can copy it straight into MT5.
 
-1. انسخ ملفات `.mq5` من مجلد `ea/`
-2. الصقها في `MQL5/Experts/` داخل مجلد MetaTrader 5
-3. افتح MetaTrader 5 وافتح الملفات من Navigator
-4. فعّل AutoTrading واترك البوت يعمل
+## Enabling Google Sign-In (no email/password)
 
----
+Google OAuth is fully wired — it just needs credentials.
 
-## ☁️ Deploy to Render
-
-النشر مجانيًا على Render.com باستخدام Blueprint:
-
-### الخطوات
-
-1. **ارفع المشروع إلى GitHub**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git remote add origin https://github.com/<username>/W-Forex-FINAL.git
-   git push -u origin main
+1. Go to **Google Cloud Console → APIs & Services → Credentials**
+   (<https://console.cloud.google.com/apis/credentials>).
+2. Create an **OAuth 2.0 Client ID** (type: *Web application*).
+3. Add the **Authorized redirect URI**:
+   - local:  `http://localhost:3000/api/auth/google/callback`
+   - Render: `https://w-forex-dashboard.onrender.com/api/auth/google/callback`
+4. Set these environment variables (in `server/.env` locally, or in the Render dashboard):
    ```
+   GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=xxxxxxxx
+   GOOGLE_REDIRECT_URI=https://w-forex-dashboard.onrender.com/api/auth/google/callback
+   ```
+5. Restart the server. The **“Continue with Google”** button on `/login` then logs users
+   in with one click — **no email or password typed**.
 
-2. **أنشئ مشروعًا جديدًا على Render**
-   - اذهب إلى [render.com](https://render.com)
-   - اضغط **New** > **Blueprint**
-   - اختر مستودع GitHub
-   - Render سيقرأ `render.yaml` تلقائيًا
+> Until Google credentials are added, the Google button is hidden automatically and the
+> standard email/password login still works.
 
-3. **الخدمات التي ستنشر تلقائيًا**
-   - `w-forex-vip-dashboard` — السيرفر (Web Service)
-   - `w-forex-vip-mobile` — تطبيق الموبايل (Docker)
+## Telegram channel
 
-### إعداد متغيرات البيئة على Render
+The dashboard shows a **“Go to Telegram”** button and an in-page popup that point to:
 
-أضف هذه المتغيرات في Render Dashboard:
-
-| المتغير | الوصف |
-|---|---|
-| `GOOGLE_CLIENT_ID` | معرّف OAuth من Google Cloud Console |
-| `GOOGLE_CLIENT_SECRET` | مفتاح OAuth من Google Cloud Console |
-| `TELEGRAM_BOT_TOKEN` | توكن بوت Telegram من @BotFather |
-| `TELEGRAM_CHAT_ID` | معرّف المحادثة على Telegram |
-| `SESSION_SECRET` | مفتاح تشفير الجلسات (سلسلة عشوائية) |
-
----
-
-## ⚙️ Environment Variables
-
-انسخ ملف القالب وعدّل القيم:
-
-```bash
-cd server
-cp .env.example .env
+```
+https://t.me/+iXalBkHABfBkYWQ0
 ```
 
-| المتغير | الوصف | الافتراضي |
-|---|---|---|
-| `PORT` | منفذ السيرفر | `3000` |
-| `AUTH_TOKEN` | رمز التوثيق | `WFOREX_SECRET` |
-| `SESSION_SECRET` | مفتاح تشفير الجلسات | — |
-| `GOOGLE_CLIENT_ID` | معرّف Google OAuth | — |
-| `GOOGLE_CLIENT_SECRET` | مفتاح Google OAuth | — |
-| `TELEGRAM_BOT_TOKEN` | توكن بوت تيليجرام | — |
-| `TELEGRAM_CHAT_ID` | معرّف محادثة تيليجرام | — |
-| `SIM_MODE` | وضع العرض التوضيحي | `true` |
-| `DATA_PROVIDER` | مزود بيانات الذهب | `simulation` |
+Set the link via the `TELEGRAM_CHANNEL_LINK` environment variable (default is already the
+channel above). Every trade open/close is also pushed there by the EA.
 
----
+## Deploy to Render
 
-## 🛠️ Tech Stack
+The included `render.yaml` deploys the server to <https://render.com>:
 
-| المكون | التقنيات |
-|---|---|
-| **Backend** | Node.js, Express.js |
-| **Real-time** | Server-Sent Events (SSE) |
-| **Auth** | Google OAuth 2.0, Passport.js |
-| **Data** | Yahoo Finance API |
-| **Mobile** | React Native, Expo, TypeScript |
-| **Notifications** | Telegram Bot API |
-| **Trading** | MQL5 (MetaTrader 5) |
-| **Deployment** | Render.com, Docker |
-| **Charts** | Custom Canvas (TradingView-style) |
+- Build: `cd server && npm install`
+- Start: `cd server && node server.js`
+- Set the environment variables in the Render dashboard
+  (`TELEGRAM_TOKEN`, `TELEGRAM_CHAT`, `TELEGRAM_CHANNEL_LINK`, `GOOGLE_CLIENT_ID`,
+  `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, `AUTH_TOKEN`).
 
----
+Production URL: <https://w-forex-dashboard.onrender.com>
 
-## 🔐 Security Notes
+## API reference (key endpoints)
 
-- لا ترفع ملف `.env` إلى GitHub — استخدم `.env.example` كقالب
-- احرص على إضافة `.env` إلى `.gitignore`
-- غيّر `AUTH_TOKEN` و `SESSION_SECRET` إلى قيم قوية في الإنتاج
-- فعّل HTTPS على Render تلقائيًا
+| Method | Path                       | Description                                  |
+|--------|----------------------------|----------------------------------------------|
+| GET    | `/`                        | Professional English dashboard               |
+| GET    | `/presentation`            | Investor pitch deck                          |
+| GET    | `/login`                   | Google / email sign-in                       |
+| GET    | `/api/state`               | Full live state (bot, account, trades, …)    |
+| GET    | `/api/stream`              | SSE live stream                              |
+| GET    | `/api/candles`             | Candlestick data                             |
+| GET    | `/api/telegram/channel-link`| Telegram invite link                        |
+| GET    | `/api/telegram/posts`      | Recent channel messages                      |
+| POST   | `/api/ea/data`             | **EA pushes** live data (auth: `AUTH_TOKEN`) |
+| GET    | `/api/auth/google`         | Start Google OAuth                           |
 
----
+## Risk notice
 
-## 📄 License
-
-هذا المشروع خاص ومرخص للاستخدام الشخصي فقط. © 2026 **W Forex VIP**
-
----
-
-<div align="center">
-
-**W Forex VIP** — بوت التداول الذكي للذهب
-
-Made with ❤️ by Ahmad Khaldi
-
-</div>
+Trading foreign exchange and gold carries a high level of risk and may not be suitable for
+all investors. Past performance is not indicative of future results. Never trade with money
+you cannot afford to lose.

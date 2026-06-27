@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>W Forex · Investor Presentation</title>
+  <meta name="description" content="W Forex — Smart gold trading bot. Investor pitch deck.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="deck.css">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow-1" aria-hidden="true"></div>
+
+  <!-- Top bar -->
+  <header class="deckbar">
+    <a href="/" class="brand"><span class="brand-mark">W</span><span>W Forex</span></a>
+    <nav class="deck-nav">
+      <span class="deck-progress"><span id="progFill"></span></span>
+      <span class="deck-count" id="deckCount">1 / 12</span>
+    </nav>
+    <div class="deck-controls">
+      <button id="prevBtn" class="dc-btn" aria-label="Previous">‹</button>
+      <button id="nextBtn" class="dc-btn" aria-label="Next">›</button>
+      <button id="fullBtn" class="dc-btn dc-full" aria-label="Fullscreen">⛶</button>
+      <a href="/" class="dc-btn dc-home">Dashboard ↗</a>
+    </div>
+  </header>
+
+  <!-- Slide stage -->
+  <main class="stage" id="stage">
+
+    <!-- 1. Cover -->
+    <section class="slide active" data-title="Cover">
+      <div class="slide-cover">
+        <span class="brand-mark xl">W</span>
+        <h1 class="cover-title">W Forex</h1>
+        <p class="cover-tag">The Smart Gold Trading Bot</p>
+        <p class="cover-sub">Automated · MT5 · XAUUSD · Real-time transparency</p>
+        <div class="cover-meta">
+          <span>Investor Pitch Deck</span>
+          <span class="dot">•</span>
+          <span>2026</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. The opportunity -->
+    <section class="slide" data-title="Opportunity">
+      <div class="slide-head">
+        <span class="kicker">The opportunity</span>
+        <h2>A $2-trillion-a-day market, mostly traded by hand</h2>
+      </div>
+      <div class="grid-3">
+        <div class="stat-card">
+          <div class="stat-big grad-gold">$2T+</div>
+          <p>daily volume in foreign exchange &amp; gold — the most liquid market on earth.</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-big grad-gold">XAUUSD</div>
+          <p>gold is the world's premier safe-haven asset, with strong, repeatable trends.</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-big grad-gold">24/5</div>
+          <p>round-the-clock trading — impossible to watch manually, perfect for automation.</p>
+        </div>
+      </div>
+      <p class="takeaway">Most retail traders lose to emotion and fatigue. <strong>W Forex</strong> removes both.</p>
+    </section>
+
+    <!-- 3. The problem -->
+    <section class="slide" data-title="Problem">
+      <div class="slide-head">
+        <span class="kicker">The problem</span>
+        <h2>Why most traders lose</h2>
+      </div>
+      <div class="grid-2 list-cards">
+        <div class="list-card"><span class="lc-num">01</span><h3>Emotion</h3><p>Fear and greed override the plan. Revenge trading destroys accounts.</p></div>
+        <div class="list-card"><span class="lc-num">02</span><h3>No risk cap</h3><p>Without a hard drawdown limit, one bad streak wipes out months of gains.</p></div>
+        <div class="list-card"><span class="lc-num">03</span><h3>Bad fills</h3><p>Entering during wide spreads and news destroys edge before it starts.</p></div>
+        <div class="list-card"><span class="lc-num">04</span><h3>Zero transparency</h3><p>Investors can't see what's happening. Trust breaks down.</p></div>
+      </div>
+    </section>
+
+    <!-- 4. The solution -->
+    <section class="slide" data-title="Solution">
+      <div class="slide-head">
+        <span class="kicker">The solution</span>
+        <h2>A fully automated, fully transparent gold bot</h2>
+      </div>
+      <div class="solution-layout">
+        <div class="sol-points">
+          <div class="sol-row"><span class="sol-ico">🧠</span><div><h4>Rules-based, emotionless</h4><p>The strategy executes identically on every tick — no fear, no greed.</p></div></div>
+          <div class="sol-row"><span class="sol-ico">🛡️</span><div><h4>Hard risk limits</h4><p>Drawdown cap, spread filter and ATR stops protect capital by design.</p></div></div>
+          <div class="sol-row"><span class="sol-ico">📡</span><div><h4>Live transparency</h4><p>Every trade streams to a public dashboard and Telegram — auditable in real time.</p></div></div>
+        </div>
+        <div class="sol-visual">
+          <div class="mini-chart">
+            <div class="mc-bar up"></div><div class="mc-bar up"></div><div class="mc-bar down"></div>
+            <div class="mc-bar up"></div><div class="mc-bar up"></div><div class="mc-bar up"></div>
+            <div class="mc-bar down"></div><div class="mc-bar up"></div><div class="mc-bar up"></div>
+          </div>
+          <div class="sol-caption">Equity curve · steady, capped risk</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. How it works -->
+    <section class="slide" data-title="Strategy">
+      <div class="slide-head">
+        <span class="kicker">Strategy</span>
+        <h2>Smart-grid with a trend filter</h2>
+      </div>
+      <div class="steps-h">
+        <div class="step-h"><div class="step-h-num">1</div><h4>Read the market</h4><p>Price · ATR (volatility) · 200-MA (trend), straight from MT5.</p></div>
+        <div class="arrow">→</div>
+        <div class="step-h"><div class="step-h-num">2</div><h4>Build the grid</h4><p>Limit orders ladder above &amp; below price, in trend direction only.</p></div>
+        <div class="arrow">→</div>
+        <div class="step-h"><div class="step-h-num">3</div><h4>Fill &amp; manage</h4><p>Sized lots, ATR stops, take-profit, intelligent trailing.</p></div>
+        <div class="arrow">→</div>
+        <div class="step-h"><div class="step-h-num">4</div><h4>Stream live</h4><p>Every event to the dashboard &amp; Telegram instantly.</p></div>
+      </div>
+      <p class="takeaway">Trade <em>with</em> the trend, average into it systematically, cut losers fast, trail winners.</p>
+    </section>
+
+    <!-- 6. Risk management -->
+    <section class="slide" data-title="Risk">
+      <div class="slide-head">
+        <span class="kicker">Risk management</span>
+        <h2>Capital protection, engineered in</h2>
+      </div>
+      <div class="grid-3">
+        <div class="risk-card"><div class="risk-ico">🛑</div><h3>Drawdown cap</h3><p>If floating + closed losses exceed your max %, the bot closes everything and stops. Non-negotiable.</p></div>
+        <div class="risk-card"><div class="risk-ico">📏</div><h3>Spread filter</h3><p>Trading auto-blocks when spreads widen beyond your limit — no toxic fills.</p></div>
+        <div class="risk-card"><div class="risk-ico">📐</div><h3>ATR stops</h3><p>Stops scale with volatility, so position sizing adapts to real market conditions.</p></div>
+        <div class="risk-card"><div class="risk-ico">⚖️</div><h3>Fixed-fractional lots</h3><p>Risk is a % of balance — never a fixed size. Account growth compounds safely.</p></div>
+        <div class="risk-card"><div class="risk-ico">🚀</div><h3>Trailing stops</h3><p>Winners are locked in automatically as price moves in favour.</p></div>
+        <div class="risk-card"><div class="risk-ico">🔒</div><h3>Max open trades</h3><p>A hard ceiling on concurrent exposure caps portfolio risk at all times.</p></div>
+      </div>
+    </section>
+
+    <!-- 7. Technology -->
+    <section class="slide" data-title="Technology">
+      <div class="slide-head">
+        <span class="kicker">Technology</span>
+        <h2>Built on proven, transparent infrastructure</h2>
+      </div>
+      <div class="tech-grid">
+        <div class="tech-item"><div class="tech-logo">MT5</div><h4>MetaTrader 5</h4><p>Execution engine running the EA directly on the broker — no third-party middleman.</p></div>
+        <div class="tech-item"><div class="tech-logo">🌐</div><h4>Live web dashboard</h4><p>Real-time candlestick chart with trades, entries, SL/TP drawn live. SSE streaming.</p></div>
+        <div class="tech-item"><div class="tech-logo">💬</div><h4>Telegram channel</h4><p>Instant push alerts for every open &amp; close — mobile-first transparency.</p></div>
+        <div class="tech-item"><div class="tech-logo">🔑</div><h4>Secure access</h4><p>Google sign-in &amp; session management. Owner-only controls.</p></div>
+      </div>
+      <div class="arch-flow">
+        <span class="af-node">MT5 Terminal</span><span class="af-arrow">→</span>
+        <span class="af-node">W Forex Bot (EA)</span><span class="af-arrow">→</span>
+        <span class="af-node af-gold">Dashboard Server</span><span class="af-arrow">→</span>
+        <span class="af-node">Web · Telegram</span>
+      </div>
+    </section>
+
+    <!-- 8. Live results -->
+    <section class="slide" data-title="Results">
+      <div class="slide-head">
+        <span class="kicker">Live &amp; transparent</span>
+        <h2>See it trade, right now</h2>
+      </div>
+      <p class="section-lead center">Every figure below is pulled live from the connected MT5 account. No backtest screenshots, no cherry-picking.</p>
+      <div class="live-metrics">
+        <div class="lm"><span class="lm-label">Balance</span><span class="lm-val" id="lmBalance">—</span></div>
+        <div class="lm"><span class="lm-label">Equity</span><span class="lm-val" id="lmEquity">—</span></div>
+        <div class="lm"><span class="lm-label">Win rate</span><span class="lm-val grad-green" id="lmWin">—</span></div>
+        <div class="lm"><span class="lm-label">Total trades</span><span class="lm-val" id="lmTotal">—</span></div>
+        <div class="lm"><span class="lm-label">Profit factor</span><span class="lm-val" id="lmPF">—</span></div>
+        <div class="lm"><span class="lm-label">Open positions</span><span class="lm-val" id="lmOpen">—</span></div>
+      </div>
+      <div class="results-cta">
+        <a href="/#chart" class="btn btn-gold btn-lg">📈 Open the live dashboard</a>
+      </div>
+      <p class="disclaimer">Past performance does not guarantee future results. Trading carries substantial risk.</p>
+    </section>
+
+    <!-- 9. Business model -->
+    <section class="slide" data-title="Business model">
+      <div class="slide-head">
+        <span class="kicker">Business model</span>
+        <h2>How W Forex makes money</h2>
+      </div>
+      <div class="grid-3">
+        <div class="bm-card highlight"><span class="bm-badge">Core</span><h3>Performance fee</h3><p>Take a % of net profit generated — aligned incentives. We only earn when investors earn.</p></div>
+        <div class="bm-card"><h3>Managed accounts</h3><p>Run the bot on funded investor accounts via MT5, with transparent monthly reporting.</p></div>
+        <div class="bm-card"><h3>VIP signals</h3><p>Premium Telegram channel with real-time trade replication for self-directed traders.</p></div>
+      </div>
+      <p class="takeaway">Revenue scales with assets under management and delivered performance.</p>
+    </section>
+
+    <!-- 10. Roadmap -->
+    <section class="slide" data-title="Roadmap">
+      <div class="slide-head">
+        <span class="kicker">Roadmap</span>
+        <h2>Where we're going</h2>
+      </div>
+      <div class="timeline">
+        <div class="tl-item done"><div class="tl-dot"></div><div class="tl-body"><span class="tl-phase">Done</span><h4>Core bot &amp; live dashboard</h4><p>Smart-grid EA, website, Telegram alerts, Google sign-in.</p></div></div>
+        <div class="tl-item now"><div class="tl-dot"></div><div class="tl-body"><span class="tl-phase">Now</span><h4>Live capital &amp; track record</h4><p>Run on funded account, build audited, publicly-visible performance history.</p></div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-body"><span class="tl-phase">Next</span><h4>Multi-strategy &amp; assets</h4><p>Add silver, indices; a second low-correlation strategy for smoother equity.</p></div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-body"><span class="tl-phase">Future</span><h4>Mobile app &amp; MAM</h4><p>iOS/Android app, MAM/PAMM for pooled investor capital at scale.</p></div></div>
+      </div>
+    </section>
+
+    <!-- 11. The ask -->
+    <section class="slide" data-title="The ask">
+      <div class="slide-head">
+        <span class="kicker">The ask</span>
+        <h2>Partner with us</h2>
+      </div>
+      <div class="ask-layout">
+        <div class="ask-card">
+          <div class="ask-amount grad-gold">$50K–$250K</div>
+          <p>seed trading capital to scale from demo to a verifiable live track record.</p>
+          <ul class="ask-list">
+            <li>✓ Funded, transparent MT5 account</li>
+            <li>✓ Performance fee on net profit only</li>
+            <li>✓ Real-time dashboard &amp; Telegram access</li>
+            <li>✓ Hard drawdown cap — capital-first protection</li>
+            <li>✓ Monthly audited statement</li>
+          </ul>
+        </div>
+        <div class="ask-side">
+          <h3>Why now</h3>
+          <p>Gold volatility is elevated, the bot is production-ready, and the first-mover advantage on a transparent, rules-based product is closing fast.</p>
+          <h3>What you get</h3>
+          <p>A disciplined, automated edge with full visibility — not a black box. You watch every trade.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. Contact / closing -->
+    <section class="slide closing" data-title="Contact">
+      <div class="closing-inner">
+        <span class="brand-mark xl">W</span>
+        <h2>Let's build the future of gold trading.</h2>
+        <p class="closing-sub">Transparent · Automated · Capital-first</p>
+        <div class="closing-actions">
+          <a href="/" class="btn btn-gold btn-lg">View live dashboard</a>
+          <a href="https://t.me/+iXalBkHABfBkYWQ0" target="_blank" rel="noopener" class="btn btn-ghost btn-lg">Join Telegram</a>
+        </div>
+        <div class="closing-contact">
+          <span>W Forex · 2026</span>
+          <span class="dot">•</span>
+          <span>XAUUSD · MT5</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Dot navigation -->
+  <nav class="dots" id="dots" aria-label="Slides"></nav>
+
+  <script src="deck.js"></script>
+  <script>
+    // live metrics on the results slide
+    async function refreshLive(){
+      try{
+        const s = await fetch('/api/state').then(r=>r.json());
+        const usd = v => v==null||isNaN(v)?'—':'$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+        const el = id=>document.getElementById(id);
+        if(el('lmBalance')) el('lmBalance').textContent = usd(s.account && s.account.balance);
+        if(el('lmEquity'))  el('lmEquity').textContent  = usd(s.account && s.account.equity);
+        if(s.performance){
+          if(el('lmWin'))   el('lmWin').textContent   = s.performance.winRate!=null ? s.performance.winRate.toFixed(1)+'%' : '—';
+          if(el('lmTotal')) el('lmTotal').textContent = s.performance.totalTrades!=null ? s.performance.totalTrades : '—';
+          if(el('lmPF'))    el('lmPF').textContent    = s.performance.profitFactor!=null ? Number(s.performance.profitFactor).toFixed(2) : '—';
+        }
+        if(el('lmOpen')) el('lmOpen').textContent = Array.isArray(s.trades)?s.trades.length:'—';
+      }catch(e){}
+    }
+    setInterval(refreshLive, 4000); refreshLive();
+  </script>
+</body>
+</html>

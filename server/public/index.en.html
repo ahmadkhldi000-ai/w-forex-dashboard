@@ -3,305 +3,360 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="W Forex VIP - Professional Smart Trading Bot Dashboard with live XAU/USD candlestick chart from MT5, real-time positions, and Telegram integration.">
-  <meta name="keywords" content="forex, gold trading, XAUUSD, mt5 chart, candlestick chart, smart bot, trading signals">
-  <title>W Forex VIP | Professional Trading Dashboard with MT5 Chart</title>
+  <title>W Forex · Smart Gold Trading Bot</title>
+  <meta name="description" content="W Forex — a fully automated smart-grid trading bot for gold (XAUUSD) on MT5. Live trades, real-time gold chart, professional risk management, and a connected Telegram signal channel.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="pro.css">
 </head>
 <body>
-  <!-- Background Chart Canvas with Logo -->
-  <canvas id="chartCanvas" class="chart-background">
-    <div class="background-logo">
-      <span class="logo-symbol">W</span>
-      <span class="logo-text">FOREX</span>
-    </div>
-  </canvas>
+  <!-- Animated background -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow-1" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow-2" aria-hidden="true"></div>
 
-  <!-- Navigation -->
-  <nav class="navbar">
-    <div class="navbar-inner">
-      <a href="#" class="logo">
-        <span class="logo-icon">◆</span>
-        <div class="logo-text">
-          <span class="logo-primary">W Forex</span>
-          <span class="logo-secondary">VIP</span>
-        </div>
+  <!-- ============ NAVBAR ============ -->
+  <header class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#top" class="brand">
+        <span class="brand-mark">W</span>
+        <span class="brand-text">W&nbsp;Forex</span>
       </a>
-      <div class="nav-menu">
-        <a href="#overview" class="nav-link">Overview</a>
-        <a href="#chart" class="nav-link">MT5 Chart</a>
-        <a href="#positions" class="nav-link">Positions</a>
-        <a href="#telegram" class="nav-link">Telegram</a>
-      </div>
+      <nav class="nav-links" id="navLinks">
+        <a href="#about">About</a>
+        <a href="#how">How it works</a>
+        <a href="#chart">Live Chart</a>
+        <a href="#positions">Positions</a>
+        <a href="#history">History</a>
+        <a href="#invest">Invest</a>
+        <a href="#presentation-link" class="nav-link-cta">Pitch Deck</a>
+      </nav>
       <div class="nav-actions">
-        <button id="loginBtn" class="btn btn-outline">Sign In</button>
+        <span class="live-pill" id="livePill"><span class="dot"></span><span id="liveText">Connecting</span></span>
+        <a href="#" id="tgNavBtn" class="btn btn-gold btn-sm">Telegram</a>
+        <a href="/login" class="btn btn-ghost btn-sm" id="navSignIn">Sign in</a>
+        <button class="nav-menu" id="navMenu" aria-label="Menu">☰</button>
       </div>
     </div>
-  </nav>
+  </header>
 
-  <!-- Hero Section -->
-  <section id="overview" class="hero-section">
-    <div class="hero-container">
-      <div class="hero-content">
-        <div class="hero-badge">
-          <span class="badge-icon">⚡</span>
-          <span class="badge-text">MT5 CHART EMBEDDED</span>
-        </div>
-        <h1 class="hero-title">
-          <span class="title-highlight">Smart Grid</span> Trading
-          <span class="title-glow">Bot</span>
-        </h1>
-        <p class="hero-description">
-          Advanced algorithmic trading powered by MetaTrader 5 Grid Strategy with
-          <strong>live XAU/USD candlestick chart</strong> embedded directly in the dashboard.
-          Managing up to <strong>15 concurrent trades</strong> with intelligent profit closure.
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="top">
+    <div class="hero-bg-chart" aria-hidden="true"></div>
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <span class="badge">⚡ Automated · MT5 · XAUUSD</span>
+        <h1>The Smart <span class="grad-gold">Gold</span><br>Trading Bot</h1>
+        <p class="hero-sub">
+          <strong>W Forex</strong> is a fully automated smart-grid expert advisor that trades
+          gold (XAUUSD) on MetaTrader 5 with institutional-grade risk control —
+          dynamic lot sizing, ATR-based stops, spread protection and a hard
+          drawdown limit. Watch every trade happen live, right here.
         </p>
+        <div class="hero-cta">
+          <a href="#chart" class="btn btn-gold btn-lg">📈 Watch the live chart</a>
+          <button class="btn btn-ghost btn-lg" id="heroTgBtn">💬 Open Telegram channel</button>
+        </div>
+        <div class="hero-trust">
+          <div class="trust-item"><span class="trust-ico">🛡️</span> Max drawdown cap</div>
+          <div class="trust-item"><span class="trust-ico">⚡</span> Real-time execution</div>
+          <div class="trust-item"><span class="trust-ico">📲</span> Instant Telegram alerts</div>
+        </div>
+      </div>
+
+      <div class="hero-panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Live Account</div>
+            <div class="panel-sub" id="heroBotName">W Forex Bot · XAUUSD</div>
+          </div>
+          <div class="price-big" id="heroPrice">—</div>
+        </div>
         <div class="hero-stats">
-          <div class="stat-card stat-primary">
-            <div class="stat-icon">📊</div>
-            <div class="stat-content">
-              <div class="stat-label">Active Trades</div>
-              <div class="stat-value" id="stat-positions">0</div>
-            </div>
+          <div class="stat">
+            <span class="stat-label">Balance</span>
+            <span class="stat-value" id="heroBalance">—</span>
           </div>
-          <div class="stat-card stat-success">
-            <div class="stat-icon">📈</div>
-            <div class="stat-content">
-              <div class="stat-label">Total Profit</div>
-              <div class="stat-value" id="stat-profit">$0.00</div>
-            </div>
+          <div class="stat">
+            <span class="stat-label">Equity</span>
+            <span class="stat-value" id="heroEquity">—</span>
           </div>
-          <div class="stat-card stat-gold">
-            <div class="stat-icon">💰</div>
-            <div class="stat-content">
-              <div class="stat-label">Win Rate</div>
-              <div class="stat-value" id="stat-winrate">0%</div>
-            </div>
+          <div class="stat">
+            <span class="stat-label">Open P/L</span>
+            <span class="stat-value" id="heroProfit">—</span>
           </div>
+          <div class="stat">
+            <span class="stat-label">Open trades</span>
+            <span class="stat-value" id="heroOpen">—</span>
+          </div>
+        </div>
+        <div class="hero-foot">
+          <span class="muted">Bot status</span>
+          <span class="status status-online" id="heroStatus">Connecting…</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- MT5 Candlestick Chart Section -->
-  <section id="chart" class="chart-section">
-    <div class="section-container">
-      <div class="section-header">
-        <div class="section-title-group">
-          <h2 class="section-title">XAU/USD <span class="title-subtitle">MT5 Candlestick Chart</span></h2>
-          <p class="section-subtitle">
-            <span class="live-badge">● Live</span>
-            Real-time candlestick chart from MetaTrader 5 data feed
-          </p>
-        </div>
-        <div class="chart-controls">
-          <div class="chart-info">
-            <div class="info-item">
-              <span class="info-label">Current Price</span>
-              <span class="info-value" id="current-price">$0.00</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Change</span>
-              <span class="info-value" id="price-change">+0.00%</span>
-            </div>
-          </div>
-        </div>
+  <!-- ============ ABOUT / PROJECT EXPLANATION ============ -->
+  <section class="section" id="about">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">About the project</span>
+        <h2>A professional, fully-automated <span class="grad-gold">gold trading system</span></h2>
+        <p class="section-lead">
+          W Forex combines a proven smart-grid strategy with strict capital protection.
+          It runs 24/5 on MetaTrader 5, places limit orders along a dynamic grid,
+          trails winners, and never risks more than the drawdown you set — then reports
+          every action to this dashboard and to your Telegram channel in real time.
+        </p>
       </div>
-      <div class="chart-wrapper">
-        <div class="chart-container">
-          <div id="mt5-chart" class="chart-box"></div>
+
+      <div class="cards feature-cards">
+        <div class="card">
+          <div class="card-ico">🧠</div>
+          <h3>Trend-aware grid</h3>
+          <p>A 200-period moving average filters direction so the bot only builds positions in line with the dominant trend — buy levels in uptrends, sell levels in downtrends.</p>
         </div>
-        <div class="chart-controls-bar">
-          <div class="timeframe-selector">
-            <button class="timeframe-btn active" data-timeframe="1m">1m</button>
-            <button class="timeframe-btn" data-timeframe="5m">5m</button>
-            <button class="timeframe-btn" data-timeframe="15m">15m</button>
-            <button class="timeframe-btn" data-timeframe="1h">1h</button>
-            <button class="timeframe-btn" data-timeframe="4h">4h</button>
-            <button class="timeframe-btn" data-timeframe="1d">1D</button>
-          </div>
-          <div class="chart-actions">
-            <button class="btn btn-outline btn-sm" onclick="resetChart()">Reset</button>
-            <button class="btn btn-outline btn-sm" onclick="toggleFullscreen()">Fullscreen</button>
-          </div>
+        <div class="card">
+          <div class="card-ico">📐</div>
+          <h3>Dynamic risk per trade</h3>
+          <p>Lot size is calculated from your balance and a configurable risk percentage, with ATR-based stop-losses that adapt to current market volatility.</p>
+        </div>
+        <div class="card">
+          <div class="card-ico">🛡️</div>
+          <h3>Hard drawdown cap</h3>
+          <p>If floating + closed losses exceed your maximum drawdown, the bot instantly closes everything, cancels pending orders and stops — protecting your capital.</p>
+        </div>
+        <div class="card">
+          <div class="card-ico">📏</div>
+          <h3>Spread protection</h3>
+          <p>Trading is automatically blocked when the spread spikes beyond your limit, so you never enter a bad fill during news or thin liquidity.</p>
+        </div>
+        <div class="card">
+          <div class="card-ico">🚀</div>
+          <h3>Trailing profit</h3>
+          <p>Winners are locked in with an intelligent trailing stop that follows price, capturing trends while protecting gains the moment momentum fades.</p>
+        </div>
+        <div class="card">
+          <div class="card-ico">📲</div>
+          <h3>Full transparency</h3>
+          <p>Every open, close, profit and loss is broadcast live to this dashboard and pushed to a private Telegram channel — nothing happens in the dark.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Positions Section -->
-  <section id="positions" class="positions-section">
-    <div class="section-container">
-      <div class="section-header">
-        <div class="section-title-group">
-          <h2 class="section-title">Open <span class="title-subtitle">Positions</span></h2>
-          <p class="section-subtitle">Real-time trade management dashboard</p>
-        </div>
-        <div class="position-stats">
-          <div class="stat-item">
-            <span class="stat-label">Total Positions</span>
-            <span class="stat-value" id="pos-total">0</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Buy Side</span>
-            <span class="stat-value" id="pos-buy">0</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Sell Side</span>
-            <span class="stat-value" id="pos-sell">0</span>
-          </div>
-        </div>
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="section section-alt" id="how">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">How it works</span>
+        <h2>From price tick to closed trade</h2>
       </div>
-      <div class="positions-wrapper">
-        <div class="positions-table-container">
-          <table class="positions-table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Symbol</th>
-                <th>Type</th>
-                <th>Volume</th>
-                <th>Open Price</th>
-                <th>Current</th>
-                <th>Spread</th>
-                <th>Profit</th>
-                <th>PnL %</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="positions-body">
-              <tr class="loading-row">
-                <td colspan="10" class="loading-cell">Loading positions...</td>
-              </tr>
-            </tbody>
-          </table>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Market is read</h3>
+          <p>On every tick the bot reads price, ATR (volatility) and the 200 MA (trend) directly from your MT5 terminal.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Grid is built</h3>
+          <p>A ladder of buy-limit and sell-limit levels is placed around price, spaced by your configured step, only in the trend direction.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Orders fill & manage</h3>
+          <p>As price reaches a level, a position opens with a calculated lot and ATR stop. Profits are taken at target; winners are trailed.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h3>Reported live</h3>
+          <p>Each event streams instantly to this dashboard chart and is sent to Telegram — a complete, auditable record of every trade.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Telegram Section -->
-  <section id="telegram" class="telegram-section">
-    <div class="section-container">
-      <div class="telegram-content">
-        <div class="telegram-header">
-          <div class="telegram-icon">✈️</div>
-          <div class="telegram-text">
-            <h2 class="telegram-title">W Forex VIP Channel</h2>
-            <p class="telegram-subtitle">
-              <a href="https://t.me/+mSKxVia8x8JlNmE0" target="_blank">
-                https://t.me/+mSKxVia8x8JlNmE0
-              </a>
-              - Live trades & signals
-            </p>
+  <!-- ============ ACCOUNT METRICS ============ -->
+  <section class="section" id="account">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Live account</span>
+        <h2>MT5 account in real time</h2>
+        <p class="section-lead">Pulled directly from the connected MetaTrader 5 terminal. When the EA is offline, the dashboard shows live gold from market data with simulated demo positions.</p>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric"><span class="metric-label">Balance</span><span class="metric-value" id="mBalance">—</span></div>
+        <div class="metric"><span class="metric-label">Equity</span><span class="metric-value" id="mEquity">—</span></div>
+        <div class="metric"><span class="metric-label">Floating P/L</span><span class="metric-value" id="mProfit">—</span></div>
+        <div class="metric"><span class="metric-label">Used margin</span><span class="metric-value" id="mMargin">—</span></div>
+        <div class="metric"><span class="metric-label">Free margin</span><span class="metric-value" id="mFree">—</span></div>
+        <div class="metric"><span class="metric-label">Margin level</span><span class="metric-value" id="mLevel">—</span></div>
+      </div>
+      <div class="performance-row">
+        <div class="metric metric-wide"><span class="metric-label">Win rate</span><span class="metric-value grad-green" id="pWin">—</span></div>
+        <div class="metric metric-wide"><span class="metric-label">Total trades</span><span class="metric-value" id="pTotal">—</span></div>
+        <div class="metric metric-wide"><span class="metric-label">Profit factor</span><span class="metric-value" id="pPF">—</span></div>
+        <div class="metric metric-wide"><span class="metric-label">Net P/L</span><span class="metric-value" id="pNet">—</span></div>
+      </div>
+      <div class="updated">Last update: <span id="lastUpdate">—</span></div>
+    </div>
+  </section>
+
+  <!-- ============ LIVE CHART (MT5) ============ -->
+  <section class="section section-alt" id="chart">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Live chart</span>
+        <h2>Gold <span class="grad-gold">(XAUUSD)</span> candlestick chart</h2>
+        <p class="section-lead">Real candles streamed from MT5 with the bot's live positions, entries, stop-losses and take-profits drawn directly on the chart. <span class="muted">W logo watermark in the background.</span></p>
+      </div>
+      <div class="chart-card">
+        <div class="chart-toolbar">
+          <div class="chart-symbol">
+            <span class="sym-dot"></span> XAUUSD · Gold
+          </div>
+          <div class="chart-tf" id="chartTf">
+            <button class="tf-btn active" data-tf="1m">1m</button>
+            <button class="tf-btn" data-tf="5m">5m</button>
+            <button class="tf-btn" data-tf="15m">15m</button>
+            <button class="tf-btn" data-tf="1h">1H</button>
+          </div>
+          <div class="chart-legend">
+            <span class="lg lg-buy">▲ Entry BUY</span>
+            <span class="lg lg-sell">▼ Entry SELL</span>
+            <span class="lg lg-sl">— SL</span>
           </div>
         </div>
-        <div class="telegram-stats">
-          <div class="telegram-stat-item">
-            <div class="telegram-stat-icon">👥</div>
-            <div class="telegram-stat-content">
-              <div class="telegram-stat-label">Members</div>
-              <div class="telegram-stat-value" id="tg-members">--</div>
-            </div>
-          </div>
-          <div class="telegram-stat-item">
-            <div class="telegram-stat-icon">📢</div>
-            <div class="telegram-stat-content">
-              <div class="telegram-stat-label">Daily Signals</div>
-              <div class="telegram-stat-value">15-20</div>
-            </div>
-          </div>
-          <div class="telegram-stat-item">
-            <div class="telegram-stat-icon">📈</div>
-            <div class="telegram-stat-content">
-              <div class="telegram-stat-label">Accuracy</div>
-              <div class="telegram-stat-value">75%+</div>
-            </div>
-          </div>
+        <div class="chart-container" id="mt5-chart">
+          <div class="chart-watermark" aria-hidden="true">W</div>
+          <div class="chart-source" id="chartSource">SIM</div>
         </div>
-        <a href="https://t.me/+mSKxVia8x8JlNmE0" target="_blank" class="telegram-button">
-          <span class="btn-icon">✈️</span>
-          <span class="btn-text">Join W Forex VIP Channel</span>
-        </a>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- ============ OPEN POSITIONS ============ -->
+  <section class="section" id="positions">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Open positions</span>
+        <h2>What the bot is holding <span class="muted" id="posCount">(0)</span></h2>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="positionsTable">
+          <thead>
+            <tr><th>#</th><th>Symbol</th><th>Type</th><th>Volume</th><th>Entry</th><th>Current</th><th>SL</th><th>P/L</th><th>Opened</th></tr>
+          </thead>
+          <tbody id="positionsBody">
+            <tr class="empty-row"><td colspan="9">No open positions right now.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TRADE HISTORY ============ -->
+  <section class="section section-alt" id="history">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">History</span>
+        <h2>Closed trades</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="historyTable">
+          <thead>
+            <tr><th>#</th><th>Symbol</th><th>Type</th><th>Volume</th><th>Open</th><th>Close</th><th>Result</th><th>Closed</th></tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr class="empty-row"><td colspan="8">No closed trades yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TELEGRAM ============ -->
+  <section class="section" id="telegram">
+    <div class="container">
+      <div class="tg-card">
+        <div class="tg-copy">
+          <span class="kicker">Signals &amp; alerts</span>
+          <h2>Join the <span class="grad-gold">W Forex</span> Telegram channel</h2>
+          <p>Every trade the bot opens and closes is pushed instantly to our private Telegram channel — entries, stop-losses, results and balance updates. Watch the bot work in real time, straight from your phone.</p>
+          <div class="tg-actions">
+            <a href="#" id="tgJoinBtn" class="btn btn-gold btn-lg" target="_blank" rel="noopener">💬 Go to Telegram</a>
+            <button class="btn btn-ghost btn-lg" id="tgPreviewBtn">👁 Preview inside site</button>
+          </div>
+        </div>
+        <div class="tg-visual" id="tgFeedPreview">
+          <div class="tg-msg tg-loading">Loading recent messages…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ INVEST / CTA ============ -->
+  <section class="section section-alt" id="invest">
+    <div class="container">
+      <div class="invest-card">
+        <span class="kicker">For investors</span>
+        <h2>Backed by code. Built for capital growth.</h2>
+        <p class="section-lead">W Forex is a transparent, rules-based trading system with enforced risk limits and a complete live audit trail. Explore the full investor pitch — strategy, performance, risk model and roadmap.</p>
+        <div class="invest-actions">
+          <a href="/presentation" class="btn btn-gold btn-lg" id="presentation-link">📊 View investor presentation</a>
+          <a href="#chart" class="btn btn-ghost btn-lg">See it trade live</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
   <footer class="footer">
-    <div class="footer-container">
+    <div class="container footer-inner">
       <div class="footer-brand">
-        <span class="footer-logo">◆</span>
-        <div class="footer-brand-text">
-          <strong>W Forex VIP</strong>
-          <span>Professional Trading Bot with MT5 Chart</span>
+        <span class="brand-mark sm">W</span>
+        <div>
+          <strong>W Forex</strong>
+          <p>Smart gold trading bot · MT5 · XAUUSD</p>
         </div>
       </div>
-      <div class="footer-links">
-        <a href="#overview" class="footer-link">Overview</a>
-        <a href="#chart" class="footer-link">MT5 Chart</a>
-        <a href="#positions" class="footer-link">Positions</a>
-        <a href="https://t.me/+mSKxVia8x8JlNmE0" target="_blank" class="footer-link">Telegram</a>
+      <div class="footer-cols">
+        <div><h4>Product</h4><a href="#about">About</a><a href="#how">How it works</a><a href="#chart">Live chart</a></div>
+        <div><h4>Trading</h4><a href="#positions">Positions</a><a href="#history">History</a><a href="#" id="footerTg">Telegram</a></div>
+        <div><h4>Company</h4><a href="/presentation">Investor deck</a><a href="/login">Sign in</a></div>
       </div>
-      <div class="footer-copyright">
-        <span>© 2026 W Forex. All rights reserved.</span>
-        <span class="copyright-divider">|</span>
-        <span>Powered by MetaTrader 5 Smart Grid</span>
-      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>© <span id="year"></span> W Forex. All rights reserved.</span>
+      <span class="muted">Trading foreign exchange and gold carries a high level of risk. Past performance is not indicative of future results.</span>
     </div>
   </footer>
 
-  <!-- Login Modal -->
-  <div id="loginModal" class="modal">
-    <div class="modal-overlay"></div>
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeLoginModal()">&times;</button>
-      <div class="modal-header">
-        <h2>Sign In</h2>
-        <p class="modal-subtitle">Access your trading dashboard</p>
+  <!-- ============ TELEGRAM MODAL (POPUP) ============ -->
+  <div class="modal-overlay" id="tgModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tgModalTitle">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="tgModalTitle">💬 W Forex Telegram Channel</div>
+          <div class="modal-sub" id="tgModalLink">—</div>
+        </div>
+        <div class="modal-head-actions">
+          <a href="#" id="tgModalOpen" class="btn btn-gold btn-sm" target="_blank" rel="noopener">Open in Telegram ↗</a>
+          <button class="modal-close" id="tgModalClose" aria-label="Close">✕</button>
+        </div>
       </div>
-      <form id="loginForm" class="login-form">
-        <div class="form-group">
-          <label for="loginEmail">Email Address</label>
-          <input type="email" id="loginEmail" required placeholder="Enter your email" autocomplete="email">
-        </div>
-        <div class="form-group">
-          <label for="loginPassword">Password</label>
-          <input type="password" id="loginPassword" required placeholder="Enter your password" autocomplete="current-password">
-        </div>
-        <div class="form-options">
-          <label class="checkbox-label">
-            <input type="checkbox" id="rememberMe">
-            <span>Remember me</span>
-          </label>
-          <a href="#" class="forgot-password">Forgot password?</a>
-        </div>
-        <button type="submit" class="btn btn-primary btn-full">
-          Sign In
-        </button>
-        <div class="form-divider">
-          <span>or continue with</span>
-        </div>
-        <button type="button" class="btn btn-google" onclick="loginWithGoogle()">
-          <svg viewBox="0 0 24 24" width="20" height="20">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-          </svg>
-          Sign in with Google
-        </button>
-      </form>
+      <div class="modal-body" id="tgModalFeed">
+        <div class="tg-loading">Loading…</div>
+      </div>
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="pro.js"></script>
 </body>
 </html>

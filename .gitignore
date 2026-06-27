@@ -40,29 +40,3 @@ build/
 .DS_Store
 Thumbs.db
 Desktop.ini
-
-# Expo (mobile)
-.expo/
-.expo-shared/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-web-build/
-
-# Apple (mobile)
-ios/Pods/
-ios/.xcode.env.local
-ios/Podfile.lock
-ios/*.xcworkspace
-!ios/default.xcworkspace
-ios/.generated/
-
-# Android (mobile)
-android/.gradle/
-android/app/build/
-android/app/release/
-android/app/debug/
-android/local.properties

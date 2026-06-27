@@ -20,6 +20,8 @@ Thumbs.db
 # Backups
 *.bak
 public/*.bak
+public/app.legacy.js
+server.log
 
 # Editor
 .vscode/

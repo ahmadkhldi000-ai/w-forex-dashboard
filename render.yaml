@@ -24,6 +24,16 @@ services:
         sync: false
       - key: TELEGRAM_CHAT
         sync: false
+      # Private Telegram channel invite link (shown in the dashboard popup)
+      - key: TELEGRAM_CHANNEL_LINK
+        value: 'https://t.me/+iXalBkHABfBkYWQ0'
+      # Google OAuth (optional — set in Render dashboard)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        value: 'https://w-forex-dashboard.onrender.com/api/auth/google/callback'
       # Owner account (optional — set in Render dashboard)
       - key: OWNER_EMAIL
         sync: false

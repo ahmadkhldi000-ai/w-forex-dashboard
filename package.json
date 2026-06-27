@@ -1,16 +1,12 @@
 {
   "name": "w-forex-full",
   "version": "1.0.0",
-  "description": "نظام W Forex الكامل — بوت MT5 + سيرفر + موقع + تطبيق هاتف",
+  "description": "نظام W Forex — بوت MT5 + سيرفر + موقع",
   "scripts": {
     "server": "cd server && npm start",
     "server:dev": "cd server && npm run dev",
     "server:install": "cd server && npm install",
-    "mobile": "cd mobile && npm start",
-    "mobile:install": "cd mobile && npm install",
-    "mobile:build": "cd mobile && npx expo build:android",
-    "mobile:preview": "cd mobile && npx expo build:android --profile preview",
-    "install:all": "npm run server:install && npm run mobile:install",
+    "install:all": "npm run server:install",
     "start": "./run_all.sh",
     "check": "node scripts/check.mjs"
   },

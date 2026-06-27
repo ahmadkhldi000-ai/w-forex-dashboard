@@ -32,26 +32,18 @@ else
   echo "   ✗ المنفذ 3000 مغلق"
 fi
 
-if lsof -i:8081 -nP 2>/dev/null | grep LISTEN >/dev/null 2>&1; then
-  echo "   ✓ المنفذ 8081 (Expo) مفتوح"
-else
-  echo "   ✗ المنفذ 8081 مغلق"
-fi
 
 # 4) فحص الملفات
 echo ""
 echo "4) فحص الملفات الحرجة:"
 [ -f server/server.js ] && echo "   ✓ server/server.js" || echo "   ✗ server/server.js"
 [ -f server/public/index.html ] && echo "   ✓ server/public/index.html" || echo "   ✗ server/public/index.html"
-[ -f mobile/App.js ] && echo "   ✓ mobile/App.js" || echo "   ✗ mobile/App.js"
-[ -f mobile/src/config.js ] && echo "   ✓ mobile/src/config.js" || echo "   ✗ mobile/src/config.js"
 [ -f ea/SmartGridEA_MaxTrades.mq5 ] && echo "   ✓ ea/SmartGridEA_MaxTrades.mq5" || echo "   ✗ ea/SmartGridEA_MaxTrades.mq5"
 
 # 5) فحص node_modules
 echo ""
 echo "5) فحص التبعيات:"
 [ -d server/node_modules ] && echo "   ✓ server/node_modules موجود" || echo "   ✗ server/node_modules ناقص"
-[ -d mobile/node_modules ] && echo "   ✓ mobile/node_modules موجود" || echo "   ✗ mobile/node_modules ناقص"
 
 # 6) فحص .env
 echo ""
@@ -85,10 +77,6 @@ fi
 
 if ! [ -d server/node_modules ]; then
   echo "- في مجلد server، شغّل: npm install"
-fi
-
-if ! [ -d mobile/node_modules ]; then
-  echo "- في مجلد mobile، شغّل: npm install"
 fi
 
 if ! [ -f server/.env ]; then

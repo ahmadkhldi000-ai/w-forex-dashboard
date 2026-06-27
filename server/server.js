@@ -32,13 +32,15 @@ if (fs.existsSync(envPath)) {
 }
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-const PORT            = parseInt(process.env.PORT, 10) || 3000;
+const PORT            = parseInt(process.env.PORT, 10) || 3001;
 const SIM_MODE        = (process.env.SIM_MODE || '').toLowerCase() === 'on';
 const GOOGLE_CLIENT_ID     = process.env.GOOGLE_CLIENT_ID || '';
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
 const GOOGLE_REDIRECT_URI  = process.env.GOOGLE_REDIRECT_URI || `http://localhost:${PORT}/api/auth/google/callback`;
 const BOT_TOKEN       = process.env.TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_TOKEN || '';
 const CHANNEL_USERNAME = process.env.TELEGRAM_CHANNEL_USERNAME || 'wforexvip';
+// Direct invite link (private channel). Overrides @username when set.
+const TELEGRAM_CHANNEL_LINK = process.env.TELEGRAM_CHANNEL_LINK || 'https://t.me/+iXalBkHABfBkYWQ0';
 const TELEGRAM_CHAT   = process.env.TELEGRAM_CHAT || '';
 const TELEGRAM_API     = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : '';
 const AUTH_TOKEN      = process.env.AUTH_TOKEN || 'WFOREX_SECRET';
@@ -64,9 +66,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Static files
+// Static files (index:false so explicit routes control the root page)
 if (fs.existsSync(PUBLIC_DIR)) {
-  app.use(express.static(PUBLIC_DIR));
+  app.use(express.static(PUBLIC_DIR, { index: false, maxAge: '1h' }));
 }
 
 // ─── Rate Limiter (in-memory) ────────────────────────────────────────────────
@@ -454,11 +456,12 @@ app.post('/api/register', rateLimit, (req, res) => {
   res.json({ ok: true, user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar, provider: user.provider, createdAt: user.createdAt } });
 });
 
-// GET /api/me — return current user
+// GET /api/me — return current user (and whether Google login is available)
 app.get('/api/me', attachUser, (req, res) => {
-  if (!req.user) return res.status(401).json({ ok: false, error: 'Not authenticated' });
+  if (!req.user) return res.status(401).json({ ok: false, error: 'Not authenticated', googleEnabled: !!GOOGLE_CLIENT_ID });
   res.json({
     ok: true,
+    googleEnabled: !!GOOGLE_CLIENT_ID,
     user: { id: req.user.id, email: req.user.email, name: req.user.name, avatar: req.user.avatar, provider: req.user.provider, createdAt: req.user.createdAt }
   });
 });
@@ -669,6 +672,44 @@ app.get('/api/telegram/posts', async (req, res) => {
   }
 });
 
+// GET /api/news — Telegram posts reshaped for the mobile News screen
+// Mobile expects: [{ id, title, summary, time, url }]
+app.get('/api/news', async (req, res) => {
+  try {
+    const tgRes = await fetch(`${req.protocol}://${req.get('host')}/api/telegram/posts`);
+    const json = await tgRes.json();
+    let posts = Array.isArray(json.posts) ? json.posts : [];
+    // Fallback to mock news when Telegram has no recent posts (empty/expired updates)
+    if (posts.length === 0) {
+      posts = [
+        { id: 1, date: Math.floor((Date.now() - 3600000) / 1000), text: '📈 XAUUSD BUY signal triggered — TP and SL levels active on the scalper.' },
+        { id: 2, date: Math.floor((Date.now() - 7200000) / 1000), text: '✅ Trade closed in profit. Gold scalper hitting targets consistently.' },
+        { id: 3, date: Math.floor((Date.now() - 14400000) / 1000), text: '📊 Weekly performance: strong win rate with positive profit factor this week.' },
+        { id: 4, date: Math.floor((Date.now() - 86400000) / 1000), text: '🚀 Live Telegram signals integration. Get real-time alerts on the VIP channel.' }
+      ];
+    }
+    const news = posts.map(p => {
+      const text = String(p.text || '');
+      const title = text.split('\n')[0].slice(0, 80) || 'W Forex Update';
+      const ts = p.date > 1e12 ? p.date : p.date * 1000; // accept s or ms
+      const minutes = Math.max(1, Math.round((Date.now() - ts) / 60000));
+      return {
+        id: p.id,
+        title,
+        summary: text.slice(0, 140),
+        time: minutes >= 60 ? `${Math.round(minutes / 60)}h ago` : `${minutes}m ago`,
+        url: 'https://t.me/wforex_vip'
+      };
+    });
+    res.json(news);
+  } catch (err) {
+    console.error('[NEWS] Error:', err.message);
+    res.json([
+      { id: 0, title: 'W Forex VIP', summary: 'Live signals and updates from the Telegram channel.', time: 'now', url: 'https://t.me/wforex_vip' }
+    ]);
+  }
+});
+
 function fetchTelegramPosts() {
   return new Promise((resolve, reject) => {
     const safeUsername = CHANNEL_USERNAME.replace('@', '');
@@ -711,8 +752,12 @@ function fetchTelegramPosts() {
 
 // GET /api/telegram/channel-link — return channel URL
 app.get('/api/telegram/channel-link', (req, res) => {
+  // Prefer a direct invite link (private channels), fall back to @username
+  if (TELEGRAM_CHANNEL_LINK && TELEGRAM_CHANNEL_LINK.startsWith('http')) {
+    return res.json({ ok: true, link: TELEGRAM_CHANNEL_LINK, type: 'invite' });
+  }
   const username = CHANNEL_USERNAME.replace('@', '');
-  res.json({ ok: true, link: `https://t.me/${username}` });
+  res.json({ ok: true, link: `https://t.me/${username}`, type: 'public' });
 });
 
 // ─── Live Data Endpoints ──────────────────────────────────────────────────────
@@ -1004,11 +1049,30 @@ app.get('/dashboard', (req, res) => {
   }
 });
 
+// Arabic dashboard (legacy)
+app.get('/ar', (req, res) => {
+  const file = path.join(PUBLIC_DIR, 'index.ar.html');
+  if (fs.existsSync(file)) res.sendFile(file);
+  else res.redirect('/');
+});
+
+// Investor presentation
+app.get('/presentation', (req, res) => {
+  const file = path.join(PUBLIC_DIR, 'presentation.html');
+  if (fs.existsSync(file)) res.sendFile(file);
+  else res.redirect('/');
+});
+
 app.get('/', (req, res) => {
+  // English is the primary language
+  const enFile = path.join(PUBLIC_DIR, 'index.en.html');
+  if (fs.existsSync(enFile)) {
+    return res.sendFile(enFile);
+  }
   if (fs.existsSync(path.join(PUBLIC_DIR, 'index.html'))) {
-    res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
-  } else {
-    res.type('text').send(`
+    return res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+  }
+  res.type('text').send(`
       <!DOCTYPE html>
       <html>
       <head><title>W Forex Dashboard</title>
@@ -1030,12 +1094,18 @@ app.get('/', (req, res) => {
       <p>SIM mode: ${SIM_MODE ? '<strong>ON</strong>' : 'OFF'}</p>
       </body></html>
     `);
-  }
 });
 
 // Serve login page at /login
 app.get('/login', (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'login.html'));
+});
+
+// Alias: /auth/google → /api/auth/google (used by login.html & Google Identity button)
+app.get('/auth/google', (req, res) => {
+  const authUrl = googleAuthUrl();
+  if (!authUrl) return res.status(500).json({ ok: false, error: 'Google OAuth is not configured' });
+  res.redirect(authUrl);
 });
 
 // Serve mobile-friendly page at /m

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>W Forex · بوت التداول الذكي</title>
+  <meta name="description" content="W Forex — بوت التداول الذكي للذهب على MT5. يعرض الصفقات المباشرة وسعر الذهب الحقيقي ويتصل بقناة W Forex VIP على تيليجرام.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ============ خلفية متحركة ============ -->
+  <div class="bg-glow" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
+
+  <!-- ============ شريط التنقل ============ -->
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="#" class="brand" id="brandHome">
+        <span class="brand-mark">W</span>
+        <span class="brand-name">W Forex<span class="brand-sub">VIP</span></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#about">عن البوت</a>
+        <a href="#chart">الشارت المباشر</a>
+        <a href="#positions">الصفقات</a>
+        <a href="#" id="tgNavBtn" class="nav-cta">قناة تيليجرام</a>
+      </nav>
+      <button class="nav-menu" id="navMenu" aria-label="القائمة">☰</button>
+    </div>
+  </header>
+
+  <!-- ============ قسم الترحيب (Hero) ============ -->
+  <section class="hero" id="top">
+    <div class="hero-inner">
+      <span class="hero-badge">⚡ بوت تداول مؤتمت بالكامل · MT5</span>
+      <h1 class="hero-title">
+        بوت <span class="grad">W Forex</span> الذكي
+        <br>لتداول الذهب
+      </h1>
+      <p class="hero-desc">
+        نظام تداول متقدّم يعمل على منصة <strong>MetaTrader 5</strong> باستراتيجية الشبكة (Grid)
+        لإدارة حتى <strong>15 صفقة</strong> في وقت واحد، مع إغلاق تلقائي عند الربح وحماية ذكية من الخسائر.
+        كل صفقة تظهر مباشرة على هذه الصفحة وفي قناة <strong>W Forex VIP</strong> على تيليجرام.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#chart" class="btn btn-primary">📊 شاهد الشارت المباشر</a>
+        <button class="btn btn-ghost" id="heroTgBtn">💬 شاهد قناة تيليجرام</button>
+      </div>
+
+      <!-- بطاقات إحصائية سريعة -->
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-label">السعر الحالي</span>
+          <span class="stat-value" id="heroPrice">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">الصفقات المفتوحة</span>
+          <span class="stat-value" id="heroOpen">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">حالة البوت</span>
+          <span class="stat-value stat-online" id="heroStatus">متصل</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">ربح الجلسة</span>
+          <span class="stat-value" id="heroProfit">—</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ قسم "عن البوت" ============ -->
+  <section class="section about" id="about">
+    <div class="section-head">
+      <h2>لماذا <span class="grad">W Forex</span>؟</h2>
+      <p>أداة تداول احترافية مصمّمة بعناية لتحقيق أفضل أداء في سوق الذهب</p>
+    </div>
+
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3>إغلاق تلقائي للربح</h3>
+        <p>يغلق كل صفقة بمجرد تحقيق هدف الربح المحدد (0.30$) دون أي تدخل يدوي، لضمان جني الأرباح بسرعة.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>حماية من الخسائر</h3>
+        <p>إغلاق جماعي تلقائي عند تجاوز 20 صفقة خاسرة، ثم استئناف ذكي عند ظهور إشارة المتوسط المتحرك.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>تنفيذ فوري</h3>
+        <p>استراتيجية الشبكة تفتح صفقات شراء وبيع على مستويات مدروسة، بحد أقصى 15 صفقة نشطة في أي وقت.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📡</div>
+        <h3>إشعارات تيليجرام</h3>
+        <p>كل صفقة (فتح/إغلاق) تُرسل مباشرة إلى قناة <strong>W Forex VIP</strong>، ويمكنك رؤيتها حيّة أدناه.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>سعر ذهب مطابق</h3>
+        <p>السعر المعروض مطابق تماماً لمنصة MT5، مع تحديث لحظي وبثّ مباشر على الشارت.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>تطبيق هاتف</h3>
+        <p>نفس لوحة الموقع متاحة على هاتفك — تابع صفقاتك وأرباحك من أي مكان وفي أي وقت.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ معلومات الحساب ============ -->
+  <section class="section">
+    <div class="metrics" id="acctMetrics">
+      <div class="metric">
+        <span class="metric-label">الرصيد</span>
+        <span class="metric-value" id="balance">—</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">حقوق الملكية</span>
+        <span class="metric-value" id="equity">—</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">الربح المفتوح</span>
+        <span class="metric-value" id="openProfit">—</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">الهامش المستخدم</span>
+        <span class="metric-value" id="margin">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ شارت MT5 المباشر ============ -->
+  <section class="section" id="chart">
+    <div class="section-head">
+      <h2>📊 شارت <span class="grad">MT5</span> المباشر — الذهب</h2>
+      <p>سعر الذهب مطابق لـ MT5 مع عرض الصفقات المفتوحة مباشرة</p>
+    </div>
+
+    <div class="chart-wrap card">
+      <div class="chart-head">
+        <div class="chart-symbol">
+          <span class="symbol-badge" id="chartSymbol">XAUUSD</span>
+          <span class="symbol-price" id="chartPrice">—</span>
+          <span class="symbol-change" id="chartChange">—</span>
+        </div>
+        <div class="chart-tools">
+          <span class="chart-tag" id="chartSource">مباشر</span>
+          <span class="chart-tag live-dot"><span class="dot"></span> LIVE</span>
+        </div>
+      </div>
+      <div class="chart-container" id="chartContainer">
+        <!-- يُحقن الشعار كخلفية عبر CSS -->
+        <div class="chart-watermark" aria-hidden="true">W FOREX</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ الصفقات المفتوحة ============ -->
+  <section class="section" id="positions">
+    <div class="section-head">
+      <h2>🔥 الصفقات المفتوحة</h2>
+      <p>الصفقات التي ينفّذها البوت الآن — تحديث مباشر</p>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>التذكرة</th>
+              <th>النوع</th>
+              <th>السعر</th>
+              <th>الحجم</th>
+              <th>الربح</th>
+              <th>الوقت</th>
+            </tr>
+          </thead>
+          <tbody id="positionsBody">
+            <tr class="empty-row"><td colspan="6">لا توجد صفقات مفتوحة حالياً</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ سجل الصفقات المنفّذة ============ -->
+  <section class="section">
+    <div class="section-head">
+      <h2>📜 آخر الصفقات المنفّذة</h2>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>التذكرة</th>
+              <th>النوع</th>
+              <th>الحجم</th>
+              <th>الربح</th>
+              <th>الوقت</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr class="empty-row"><td colspan="5">لا يوجد سجل بعد</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ قناة تيليجرام ============ -->
+  <section class="section">
+    <div class="section-head">
+      <h2>💬 قناة <span class="grad">W Forex VIP</span></h2>
+      <p>شاهد كيف تصل إشارات البوت مباشرة إلى تيليجرام</p>
+    </div>
+    <div class="tg-card card">
+      <div class="tg-head">
+        <div class="tg-avatar">W</div>
+        <div>
+          <strong>W Forex VIP</strong>
+          <span class="tg-sub">قناة الإشارات المباشرة</span>
+        </div>
+        <button class="btn btn-sm" id="openTgModal">عرض كل الرسائل</button>
+      </div>
+      <div class="tg-feed" id="tgFeed">
+        <div class="tg-loading">جارٍ تحميل آخر الرسائل…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Footer ============ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-brand">W Forex VIP · <span id="footerVersion">1.10</span></span>
+      <span class="footer-meta">آخر تحديث: <span id="lastUpdate">—</span></span>
+    </div>
+  </footer>
+
+  <!-- ============ رسالة الترحيب المنبثقة ============ -->
+  <div class="welcome-overlay" id="welcomeOverlay">
+    <div class="welcome-box">
+      <div class="welcome-emoji">👋</div>
+      <h2>أهلاً بك في <span class="grad">W Forex</span></h2>
+      <p>منصة التداول الذكي للذهب على MT5. تابع الصفقات المباشرة والإشعارات لحظة بلحظة، واكتشف كيف يعمل البوت بالكامل.</p>
+      <button class="btn btn-primary" id="welcomeClose">هيا نبدأ 🚀</button>
+    </div>
+  </div>
+
+  <!-- ============ مودال تيليجرام الكامل ============ -->
+  <div class="modal-overlay" id="tgModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div>
+          <h3>💬 قناة W Forex VIP</h3>
+          <span class="modal-sub">آخر رسائل البوت المباشرة على تيليجرام</span>
+        </div>
+        <button class="modal-close" id="tgModalClose">✕</button>
+      </div>
+      <div class="modal-body" id="tgModalFeed">
+        <div class="tg-loading">جارٍ التحميل…</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

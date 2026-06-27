@@ -1,118 +1,68 @@
 ═══════════════════════════════════════════════════════════
-   W-Forex-Dashboard  —  المشروع الكامل (EA + Server + Web UI + Mobile)
+   W Forex — Smart Gold Trading System  (PRO · English)
+   لوحة تحكم احترافية + بوت MT5 + عرض المستثمرين
 ═══════════════════════════════════════════════════════════
 
-هذا المجلد يحتوي على الكود الكامل جاهزاً للعرض والنسخ.
+تم تحديث المشروع بالكامل ليصبح احترافياً وباللغة الإنجليزية.
 
-┌─── هيكل المجلد ──────────────────────────────────────────
+┌─── ما الجديد ──────────────────────────────────────────────
 │
-│  📁 ea/
-│     └── InstitutionalHedgeEA.mq5
-│           ↓ EA الخاص بـ MT5 (مع وحدة اتصال السيرفر)
+│  ✅ لوحة تحكم احترافية ENGLISH كاملة (pro.css + pro.js)
+│     - قسم Hero + شرح احترافي للمشروع (About / How it works)
+│     - شارت الذهب (XAUUSD) مع شعار W في الخلفية (watermark)
+│     - ظهور صفقات البوت مباشرة على الشارت (أسعار الدخول + SL/TP)
+│     - جداول الصفقات المفتوحة والمغلقة + إحصائيات الأداء
 │
-│  📁 server/
-│     ├── server.js            ← السيرفر الرئيسي (Express)
-│     ├── auth.js              ← نظام المصادقة (تسجيل/دخول/جلسات)
-│     ├── google.js            ← تسجيل الدخول بـ Google
-│     ├── seed-candles.js      ← سكربت بيانات تجريبية للشموع
-│     ├── package.json         ← تبعيات المشروع
-│     ├── package-lock.json
-│     ├── render.yaml          ← إعداد النشر على Render.com
-│     ├── README.md            ← شرح المشروع
-│     ├── .gitignore
-│     ├── .env.example         ← نموذج متغيرات البيئة
-│     └── 📁 public/           ← واجهة الويب
-│            ├── index.html    ← لوحة التحكم الرئيسية
-│            ├── login.html    ← صفحة الدخول
-│            ├── reset.html    ← استعادة كلمة المرور
-│            ├── app.js        ← منطق لوحة التحكم
-│            ├── auth.js       ← منطق الدخول/التسجيل
-│            ├── reset.js      ← منطق الاستعادة
-│            ├── style.css     ← تصميم لوحة التحكم
-│            ├── auth.css      ← تصميم الدخول
-│            ├── reset.css     ← تصميم الاستعادة
-│            ├── favicon.svg
-│            └── logo.svg
+│  ✅ ميزة "Go to Telegram" + نافذة منبثقة (popup)
+│     - مرتبطة بالقناة: https://t.me/+iXalBkHABfBkYWQ0
+│
+│  ✅ تسجيل الدخول بـ Google (بدون إيميل/كلمة سر)
+│     - تم إصلاح مسار OAuth + إضافة التعليمات في README
+│
+│  ✅ بوت التداول "W Forex Bot.mq5"
+│     - نفس كود SmartGridEA_Safe_v2 (الشبكة + التيليجرام)
+│     + بث حيّ للسيرفر: الحساب، الشموع، الصفقات، السجل
+│     - محفوظ على سطح المكتب:  ~/Desktop/W Forex Bot.mq5
+│
+│  ✅ برزنتيشن المستثمرين (12 شريحة) على /presentation
 │
 └──────────────────────────────────────────────────────────
 
-
-┌─── آلية الاتصال (EA ↔ Server) ───────────────────────────
+┌─── التشغيل السريع ─────────────────────────────────────────
 │
-│  EA يرسل بيانات حية كل 5 ثوانٍ عبر HTTP POST:
-│
-│    POST  https://<your-server>/api/update
-│    Header: X-Auth-Token: WFOREX_SECRET_2026
-│    Header: Content-Type: application/json
-│    Body: { bot, account, positions, candle, stats, regime }
-│
-│  وعند الإقلاع يرسل heartbeat:
-│
-│    POST  https://<your-server>/api/heartbeat
+│  cd server && npm install && npm start
+│  → http://localhost:3000            (اللوحة)
+│  → http://localhost:3000/presentation  (العرض)
 │
 └──────────────────────────────────────────────────────────
 
-
-┌─── خطوات التشغيل ────────────────────────────────────────
+┌─── ربط حساب MT5 الحقيقي ──────────────────────────────────
 │
-│  1) السيرفر (محلياً):
-│     cd server
-│     npm install
-│     npm start
-│     → يعمل على http://localhost:3000
+│  1. انسخ  ea/W Forex Bot.mq5  إلى  MQL5/Experts/
+│  2. افتحه في MetaEditor واضغط F7 للترجمة
+│  3. في MT5: Tools > Options > Expert Advisors
+│       فعّل "Allow WebRequest for listed URL" وأضف:
+│         https://w-forex-dashboard.onrender.com
+│         https://api.telegram.org
+│  4. ألصق البوت على شارت XAUUSD وفعّل Algo Trading
+│  5. بالإعدادات:
+│       DashboardURL   = https://w-forex-dashboard.onrender.com/api/ea/data
+│       DashboardToken = WFOREX_SECRET_2026
+│       EnableDashboard = true
 │
-│  2) السيرفر (نشر سحابي على Render):
-│     - ارفع مجلد server/ إلى GitHub
-│     - استورد المستودع في render.com باستخدام render.yaml
-│     - عيّن متغير البيئة AUTH_TOKEN = WFOREX_SECRET_2026
-│
-│  3) الـ EA على MT5:
-│     - انسخ ea/InstitutionalHedgeEA.mq5 إلى:
-│       MQL5/Experts/  داخل مجلد بيانات MT5
-│     - Tools → Options → Expert Advisors
-│         ✅ فعّل "Allow WebRequest for listed URL"
-│         ➕ أضف رابط السيرفر (مثلاً https://w-forex-dashboard.onrender.com)
-│     - أرفق الـ EA على الشارت وتأكد من الإعدادات:
-│         DashboardURL   = رابط السيرفر
-│         DashboardToken = WFOREX_SECRET_2026  (نفس AUTH_TOKEN بالسيرفر)
-│         UseDashboard   = true
+│  → خلال ثوانٍ تضيء اللوحة "Live · EA" وتظهر صفقاتك مباشرة.
 │
 └──────────────────────────────────────────────────────────
 
-
-┌─── بيانات الدخول التجريبية ──────────────────────────────
+┌─── تفعيل Google Sign-In ──────────────────────────────────
 │
-│  حساب جاهز بعد أول تشغيل للسيرفر:
-│     📧 demo@wforex.io
-│     🔑 demo123
-│
-└──────────────────────────────────────────────────────────
-
-
-┌─── تطبيق الموبايل (mobile/) ─────────────────────────────
-│
-│  تطبيق React Native + Expo لعرض لوحة التحكم على الهاتف.
-│  - شاشة واحدة (App.js) تعرض: السعر المباشر، الرصيد،
-│    الإحصائيات، الصفقات المفتوحة والمغلقة، و zennebar للسعر.
-│  - يتصل بالخادم عبر /api/state كل 5 ثوانٍ.
-│  - لون ذهبي/داكن مطابق للوحة الويب.
-│
-│  التشغيل:
-│     npm install
-│     npm start        ← ثم امسح QR code بتطبيق Expo Go
-│
-│  ملاحظة: عدّل API_BASE في App.js إلى IP جهازك على الشبكة.
-│
-└──────────────────────────────────────────────────────────
-
-
-┌─── التحسينات الأمنية المطبّقة ──────────────────────────
-│
-│  ✓ CORS مقيّد على النطاقات المعروفة فقط (CORS_ORIGINS)
-│  ✓ ترويسات أمان HTTP (X-Frame, nosniff, Referrer, Permissions)
-│  ✓ rate-limit على /api/login (8 محاولات/دقيقة لكل IP)
-│  ✓ مقارنة توكن EA مقاومة لتسريب التوقيت (timingSafeEqual)
-│  ✓ .gitignore شامل (يحمي .env و users.json و data.json)
-│  ✓ كلمات المرور مجزّأة بـ PBKDF2 (salt:hash)
+│  1. https://console.cloud.google.com/apis/credentials
+│  2. أنشئ OAuth 2.0 Client ID (Web application)
+│  3. Authorized redirect URI:
+│       https://w-forex-dashboard.onrender.com/api/auth/google/callback
+│  4. ضع في .env (أو Render Dashboard):
+│       GOOGLE_CLIENT_ID=...
+│       GOOGLE_CLIENT_SECRET=...
+│       GOOGLE_REDIRECT_URI=https://w-forex-dashboard.onrender.com/api/auth/google/callback
 │
 └──────────────────────────────────────────────────────────
