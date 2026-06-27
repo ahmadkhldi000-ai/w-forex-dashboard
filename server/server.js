@@ -161,6 +161,45 @@ function saveUsers() {
 loadData();
 loadUsers();
 
+// ─── Owner account auto-seed ─────────────────────────────────────────────────
+// Ensures the owner account exists with a known password (set via env).
+// If the account already exists, the password is updated to OWNER_PASSWORD.
+const OWNER_EMAIL    = process.env.OWNER_EMAIL    || '';
+const OWNER_NAME     = process.env.OWNER_NAME     || 'Owner';
+const OWNER_PASSWORD = process.env.OWNER_PASSWORD || '';
+
+function ensureOwnerAccount() {
+  if (!OWNER_EMAIL || !OWNER_PASSWORD) {
+    console.log('[OWNER] OWNER_EMAIL / OWNER_PASSWORD not set — skipping owner seed.');
+    return;
+  }
+  const existing = usersDB.users.find(u => u.email === OWNER_EMAIL);
+  const hash = hashPassword(OWNER_PASSWORD);
+  if (existing) {
+    if (!verifyPassword(OWNER_PASSWORD, existing.password)) {
+      existing.password = hash;
+      if (OWNER_NAME) existing.name = OWNER_NAME;
+      saveUsers();
+      console.log(`[OWNER] Updated password for existing owner: ${OWNER_EMAIL}`);
+    } else {
+      console.log(`[OWNER] Owner password already correct: ${OWNER_EMAIL}`);
+    }
+  } else {
+    usersDB.users.push({
+      id: 'u_' + crypto.randomBytes(8).toString('hex'),
+      email: OWNER_EMAIL,
+      name: OWNER_NAME,
+      provider: 'local',
+      password: hash,
+      avatar: null,
+      createdAt: Date.now()
+    });
+    saveUsers();
+    console.log(`[OWNER] Created owner account: ${OWNER_EMAIL}`);
+  }
+}
+ensureOwnerAccount();
+
 // Auto-save every 30 seconds
 setInterval(() => {
   saveData();

@@ -34,11 +34,13 @@ services:
         sync: false
       - key: GOOGLE_REDIRECT_URI
         value: 'https://w-forex-dashboard.onrender.com/api/auth/google/callback'
-      # Owner account (optional — set in Render dashboard)
+      # Owner account (auto-seeded on boot with these credentials)
       - key: OWNER_EMAIL
-        sync: false
+        value: 'ahmadkhldi000@gmail.com'
       - key: OWNER_NAME
-        sync: false
+        value: 'Ahmad Khaldi'
+      - key: OWNER_PASSWORD
+        value: 'Wforex2026!'
       # SIM mode — keep ON for demo without EA
       - key: SIM_MODE
         value: 'on'

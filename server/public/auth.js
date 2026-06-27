@@ -117,8 +117,12 @@
 
   // ---------- Google availability ----------
   fetch('/api/me', { credentials: 'same-origin' }).then(r => r.json()).then(d => {
-    // If Google isn't configured server-side, gracefully hide the button
-    if (!d.googleEnabled) googleBtn.style.display = 'none';
+    // If Google isn't configured server-side, gracefully hide the button + divider
+    if (!d.googleEnabled) {
+      if (googleBtn) googleBtn.style.display = 'none';
+      const divider = document.querySelector('.divider');
+      if (divider) divider.style.display = 'none';
+    }
   }).catch(() => {});
 
   setMode('login');
