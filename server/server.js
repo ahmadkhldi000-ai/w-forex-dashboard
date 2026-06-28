@@ -449,6 +449,56 @@ app.get('/api/auth/google/callback', async (req, res) => {
   }
 });
 
+// POST /api/auth/google/token — Google Identity Services (GIS) flow.
+// The browser obtains a Google ID token (JWT) via accounts.google.com/gsi/client
+// and posts it here. We verify the email and create a session.
+// Works WITHOUT a client secret (frontend-only Google Client ID).
+app.post('/api/auth/google/token', rateLimit, async (req, res) => {
+  const idToken = (req.body && req.body.credential) || req.body.id_token || req.body.idToken;
+  if (!idToken) return res.status(400).json({ ok: false, error: 'Missing Google credential' });
+
+  try {
+    // Verify the token using Google's public cert endpoint (no secret needed)
+    const verify = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken));
+    if (!verify.ok) return res.status(401).json({ ok: false, error: 'Invalid Google token' });
+    const profile = await verify.json();
+
+    const email = (profile.email || '').toLowerCase().trim();
+    if (!email || profile.email_verified !== 'true') {
+      return res.status(400).json({ ok: false, error: 'Google email not verified' });
+    }
+
+    // Find or create the user from this Google account
+    let user = usersDB.users.find(u => u.email === email && u.provider === 'google');
+    if (!user) {
+      user = {
+        id: generateUserId(),
+        email,
+        name: profile.name || profile.given_name || email.split('@')[0],
+        provider: 'google',
+        password: null,
+        avatar: profile.picture || null,
+        googleId: profile.sub || profile.id,
+        createdAt: Date.now()
+      };
+      usersDB.users.push(user);
+      saveUsers();
+    }
+    const token = makeSessionToken(user.id);
+    res.cookie('session', token, sessionCookieOptions());
+    return res.json({ ok: true, user: { email: user.email, name: user.name } });
+  } catch (err) {
+    console.error('[GOOGLE GIS] Error:', err.message);
+    return res.status(500).json({ ok: false, error: 'Google sign-in failed' });
+  }
+});
+
+// GET /api/google-config — returns whether GIS (Google Identity Services) is available
+// and the public Client ID so the login page can render the Google button.
+app.get('/api/google-config', (req, res) => {
+  res.json({ googleClientId: GOOGLE_CLIENT_ID || '', enabled: !!GOOGLE_CLIENT_ID });
+});
+
 // POST /api/login — email/password login
 app.post('/api/login', rateLimit, (req, res) => {
   const { email, password } = req.body || {};
@@ -1145,9 +1195,72 @@ app.get('/login', (req, res) => {
 
 // Alias: /auth/google → /api/auth/google (used by login.html & Google Identity button)
 app.get('/auth/google', (req, res) => {
+  // If Google OAuth is configured, redirect to the real Google consent screen
   const authUrl = googleAuthUrl();
-  if (!authUrl) return res.status(500).json({ ok: false, error: 'Google OAuth is not configured' });
-  res.redirect(authUrl);
+  if (authUrl) return res.redirect(authUrl);
+
+  // Fallback: show a friendly account-picker page when Google OAuth is not configured yet
+  const ownerEmail = (OWNER_EMAIL || 'owner@wforex.local').replace(/[<>"'&]/g, '');
+  const ownerName  = (OWNER_NAME  || 'W Forex Owner').replace(/[<>"'&]/g, '');
+  res.status(503).send(`<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in with Google · W Forex</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',system-ui,sans-serif}
+  body{min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 30% 20%,#1a1f2e,#0b0e14);color:#e6e9ef;padding:20px}
+  .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:40px 36px;max-width:420px;width:100%;text-align:center;backdrop-filter:blur(20px)}
+  .google-logo{width:48px;height:48px;margin:0 auto 16px;display:block}
+  h1{font-size:24px;font-weight:700;margin-bottom:8px}
+  .sub{color:#9aa3b2;font-size:14px;margin-bottom:28px;line-height:1.5}
+  .account-btn{display:flex;align-items:center;gap:14px;width:100%;padding:14px 16px;border:1px solid rgba(255,255,255,0.1);border-radius:12px;background:rgba(255,255,255,0.02);color:#e6e9ef;cursor:pointer;transition:all .15s;margin-bottom:10px;text-align:left}
+  .account-btn:hover{background:rgba(255,255,255,0.06);border-color:rgba(212,175,55,0.4)}
+  .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#f4d160);display:grid;place-items:center;color:#0b0e14;font-weight:800;font-size:18px;flex-shrink:0}
+  .account-info b{display:block;font-size:14px;font-weight:600}
+  .account-info span{display:block;font-size:12px;color:#9aa3b2}
+  .hint{margin-top:24px;padding:14px;border-radius:10px;background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.2);font-size:12px;color:#ffc107;text-align:right;direction:rtl;line-height:1.6}
+  .back-link{display:inline-block;margin-top:20px;color:#9aa3b2;text-decoration:none;font-size:13px}
+  .back-link:hover{color:#d4af37}
+</style>
+</head>
+<body>
+  <div class="card">
+    <svg class="google-logo" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22 22-9.8 22-22c0-1.5-.2-2.6-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 4.1 29.6 2 24 2 16.3 2 9.7 6.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 46c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5c-2 1.5-4.7 2.5-7.6 2.5-5.2 0-9.6-3.3-11.2-7.9l-6.6 5.1C9.7 41.7 16.2 46 24 46z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.5l6.5 5.5C41.8 36.5 46 31 46 24c0-1.5-.2-2.6-.4-3.5z"/></svg>
+    <h1>Choose an account</h1>
+    <p class="sub">to continue to <b>W Forex Dashboard</b></p>
+
+    <button class="account-btn" onclick="window.location.href='/login'">
+      <div class="avatar">${ownerName.charAt(0)}</div>
+      <div class="account-info">
+        <b>${ownerName}</b>
+        <span>${ownerEmail}</span>
+      </div>
+    </button>
+
+    <button class="account-btn" onclick="window.location.href='/login'">
+      <div class="avatar" style="background:rgba(255,255,255,0.08);color:#9aa3b2">+</div>
+      <div class="account-info">
+        <b>Use another account</b>
+        <span>Sign in with email &amp; password</span>
+      </div>
+    </button>
+
+    <div class="hint">
+      ⚠️ <b>Google OAuth غير مُفعّل بعد.</b><br>
+      لإتمام تسجيل الدخول الفعلي عبر Google، أضف<br>
+      <code>GOOGLE_CLIENT_ID</code> و <code>GOOGLE_CLIENT_SECRET</code><br>
+      إلى ملف <code>.env</code> بعد إنشائها من Google Cloud Console.
+    </div>
+
+    <a class="back-link" href="/login">← Back to sign in</a>
+  </div>
+</body>
+</html>`);
 });
 
 // Serve mobile-friendly page at /m

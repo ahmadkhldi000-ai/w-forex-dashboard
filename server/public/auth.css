@@ -120,6 +120,8 @@ html{scroll-behavior:smooth}
   text-decoration:none;cursor:pointer;transition:all 0.2s;
 }
 .btn-google:hover{background:var(--surface-hover);border-color:rgba(255,255,255,0.2)}
+.btn-google.loading{opacity:0.65;pointer-events:none}
+.btn-google.loading span::after{content:' …';}
 
 /* Divider */
 .divider{

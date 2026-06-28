@@ -116,14 +116,61 @@
   });
 
   // ---------- Google availability ----------
-  fetch('/api/me', { credentials: 'same-origin' }).then(r => r.json()).then(d => {
-    // If Google isn't configured server-side, gracefully hide the button + divider
-    if (!d.googleEnabled) {
-      if (googleBtn) googleBtn.style.display = 'none';
-      const divider = document.querySelector('.divider');
-      if (divider) divider.style.display = 'none';
+  fetch('/api/google-config', { credentials: 'same-origin' }).then(r => r.json()).then(cfg => {
+    if (cfg.enabled && cfg.googleClientId && window.google) {
+      // Native GIS button available — render it into our button
+      window.google.accounts.id.initialize({
+        client_id: cfg.googleClientId,
+        callback: handleGoogleCredential
+      });
+      window.google.accounts.id.renderButton(googleBtn, { type: 'standard', size: 'large', text: 'signup_with' });
+    } else if (cfg.enabled && cfg.googleClientId) {
+      // GIS script not loaded yet — load it, then render
+      const s = document.createElement('script');
+      s.src = 'https://accounts.google.com/gsi/client';
+      s.async = true; s.defer = true;
+      s.onload = () => {
+        window.google.accounts.id.initialize({
+          client_id: cfg.googleClientId,
+          callback: handleGoogleCredential
+        });
+        window.google.accounts.id.renderButton(googleBtn, { type: 'standard', size: 'large', text: 'signup_with' });
+      };
+      document.head.appendChild(s);
+    } else {
+      // No Client ID configured — keep the styled fallback button that redirects to OAuth
+      googleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = '/auth/google';
+      });
     }
-  }).catch(() => {});
+  }).catch(() => {
+    // Network error — still allow the redirect fallback
+    if (googleBtn) googleBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = '/auth/google'; });
+  });
+
+  // Handle Google ID credential (JWT) from GIS
+  function handleGoogleCredential(response) {
+    const banner = document.getElementById('banner');
+    googleBtn && googleBtn.classList.add('loading');
+    fetch('/api/auth/google/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ credential: response.credential })
+    }).then(r => r.json()).then(d => {
+      if (d.ok) {
+        if (banner) { banner.hidden = false; banner.className = 'auth-banner success'; banner.textContent = '✓ Welcome, ' + (d.user && d.user.name || '') + '! Redirecting…'; }
+        setTimeout(() => window.location.href = '/', 700);
+      } else {
+        if (banner) { banner.hidden = false; banner.className = 'auth-banner error'; banner.textContent = '✗ ' + (d.error || 'Google sign-in failed'); }
+        googleBtn && googleBtn.classList.remove('loading');
+      }
+    }).catch(() => {
+      if (banner) { banner.hidden = false; banner.className = 'auth-banner error'; banner.textContent = '✗ Network error'; }
+      googleBtn && googleBtn.classList.remove('loading');
+    });
+  }
 
   setMode('login');
 })();
