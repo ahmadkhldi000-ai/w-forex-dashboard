@@ -459,7 +459,10 @@ app.post('/api/login', rateLimit, (req, res) => {
   if (!user) {
     return res.status(401).json({ ok: false, error: 'Invalid email or password' });
   }
-  if (!verifyPassword(password, user.password)) {
+  // Allow login with raw OWNER_PASSWORD for owner account when env is set
+  if (user.email === OWNER_EMAIL && OWNER_PASSWORD && password === OWNER_PASSWORD) {
+    // bypass hash verification
+  } else if (!verifyPassword(password, user.password)) {
     return res.status(401).json({ ok: false, error: 'Invalid email or password' });
   }
   const token = makeSessionToken(user.id);

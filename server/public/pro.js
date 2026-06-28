@@ -188,6 +188,7 @@ function applyPositions(trades) {
   lastTrades = trades || [];
   const body = $('positionsBody');
   $('posCount').textContent = '(' + lastTrades.length + ')';
+  const panel = $('posCountPanel'); if (panel) panel.textContent = '(' + lastTrades.length + ')';
   $('heroOpen').textContent = lastTrades.length;
 
   if (!lastTrades.length) {
@@ -361,6 +362,50 @@ function bindTimeframes() {
   });
 }
 
+/* ---------- Page-view router (separate pages per nav item) ---------- */
+const POS_VIEW_LIMIT = 6; // compact: show first N, scroll for the rest
+const viewRoute = { about: 'home', how: 'home', home: 'home', chart: 'chart', positions: 'positions', history: 'history', invest: 'invest', deck: 'home' };
+
+function setView(name) {
+  const target = viewRoute[name] || 'home';
+  document.querySelectorAll('.page-view').forEach(v => {
+    v.classList.toggle('is-active', v.dataset.view === target);
+  });
+  document.querySelectorAll('[data-nav]').forEach(a => {
+    a.classList.toggle('is-current', viewRoute[a.dataset.nav] === target);
+  });
+  // Keep nav scroll-shadow state in sync
+  const nav = $('nav');
+  if (nav) nav.classList.toggle('scrolled', window.scrollY > 10);
+  // Refresh chart sizing after the chart view becomes visible
+  if (target === 'chart' && chart && typeof chart.timeScale === 'function') {
+    setTimeout(() => {
+      const c = $('mt5-chart');
+      if (c) chart.applyOptions({ width: c.clientWidth, height: c.clientHeight });
+      try { chart.timeScale().fitContent(); } catch (_) {}
+    }, 60);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function initPageRouter() {
+  document.querySelectorAll('[data-nav]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const nav = link.dataset.nav;
+      if (nav === 'deck') return; // deck link navigates normally
+      if (viewRoute[nav]) {
+        e.preventDefault();
+        if (history.replaceState) history.replaceState(null, '', '#' + (link.getAttribute('href') || '').replace('#', ''));
+        setView(nav);
+        $('navLinks') && $('navLinks').classList.remove('open');
+      }
+    });
+  });
+  // Restore view from URL hash on load (e.g. /#about)
+  const hash = (location.hash || '').replace('#', '');
+  if (hash && viewRoute[hash]) setView(hash);
+}
+
 /* ---------- Boot ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   $('year').textContent = new Date().getFullYear();
@@ -390,6 +435,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   bindTimeframes();
   syncTelegramLinks();
+
+  // Page-view router (nav links open separate pages)
+  initPageRouter();
 
   // Init chart + load data
   initChart();

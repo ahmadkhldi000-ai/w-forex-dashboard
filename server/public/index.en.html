@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>W Forex · Smart Gold Trading Bot</title>
   <meta name="description" content="W Forex — a fully automated smart-grid trading bot for gold (XAUUSD) on MT5. Live trades, real-time gold chart, professional risk management, and a connected Telegram signal channel.">
+  <meta name="author" content="W Forex — Private Property">
+  <meta name="owner" content="W Forex">
+  <meta name="copyright" content="W Forex. All rights reserved.">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="W Forex · Smart Gold Trading Bot">
+  <meta property="og:description" content="A fully automated smart-grid trading bot for gold (XAUUSD) on MT5. Private property.">
+  <meta name="theme-color" content="#07090f">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,18 +28,18 @@
   <!-- ============ NAVBAR ============ -->
   <header class="nav" id="nav">
     <div class="nav-inner">
-      <a href="#top" class="brand">
+      <a href="#top" class="brand" data-nav="home" title="W Forex — Private Property">
         <span class="brand-mark">W</span>
-        <span class="brand-text">W&nbsp;Forex</span>
+        <span class="brand-text">W&nbsp;Forex<span class="brand-private">Private</span></span>
       </a>
       <nav class="nav-links" id="navLinks">
-        <a href="#about">About</a>
-        <a href="#how">How it works</a>
-        <a href="#chart">Live Chart</a>
-        <a href="#positions">Positions</a>
-        <a href="#history">History</a>
-        <a href="#invest">Invest</a>
-        <a href="#presentation-link" class="nav-link-cta">Pitch Deck</a>
+        <a href="#about" data-nav="about">About</a>
+        <a href="#how" data-nav="how">How it works</a>
+        <a href="#chart" data-nav="chart">Live Chart</a>
+        <a href="#positions" data-nav="positions">Positions</a>
+        <a href="#history" data-nav="history">History</a>
+        <a href="#invest" data-nav="invest">Invest</a>
+        <a href="#presentation-link" class="nav-link-cta" data-nav="deck">Pitch Deck</a>
       </nav>
       <div class="nav-actions">
         <span class="live-pill" id="livePill"><span class="dot"></span><span id="liveText">Connecting</span></span>
@@ -42,6 +50,10 @@
     </div>
   </header>
 
+  <main class="page-stage" id="pageStage">
+  <!-- ============ PAGE: HOME (hero + about + account) ============ -->
+  <div class="page-view is-active" data-view="home" id="view-home">
+
   <!-- ============ HERO ============ -->
   <section class="hero" id="top">
     <div class="hero-bg-chart" aria-hidden="true"></div>
@@ -49,6 +61,7 @@
       <div class="hero-copy">
         <span class="badge">⚡ Automated · MT5 · XAUUSD</span>
         <h1>The Smart <span class="grad-gold">Gold</span><br>Trading Bot</h1>
+        <span class="hero-owner">🔒 Private property · Owned &amp; operated by W Forex</span>
         <p class="hero-sub">
           <strong>W Forex</strong> is a fully automated smart-grid expert advisor that trades
           gold (XAUUSD) on MetaTrader 5 with institutional-grade risk control —
@@ -207,6 +220,11 @@
     </div>
   </section>
 
+  </div><!-- /view-home -->
+
+  <!-- ============ PAGE: LIVE CHART ============ -->
+  <div class="page-view" data-view="chart" id="view-chart">
+
   <!-- ============ LIVE CHART (MT5) ============ -->
   <section class="section section-alt" id="chart">
     <div class="container">
@@ -241,24 +259,40 @@
   </section>
 
   <!-- ============ OPEN POSITIONS ============ -->
+  </div><!-- /view-chart -->
+
+  <!-- ============ PAGE: OPEN POSITIONS ============ -->
+  <div class="page-view" data-view="positions" id="view-positions">
+
   <section class="section" id="positions">
     <div class="container">
       <div class="section-head">
         <span class="kicker">Open positions</span>
         <h2>What the bot is holding <span class="muted" id="posCount">(0)</span></h2>
       </div>
-      <div class="table-wrap">
-        <table class="data-table" id="positionsTable">
-          <thead>
-            <tr><th>#</th><th>Symbol</th><th>Type</th><th>Volume</th><th>Entry</th><th>Current</th><th>SL</th><th>P/L</th><th>Opened</th></tr>
-          </thead>
-          <tbody id="positionsBody">
-            <tr class="empty-row"><td colspan="9">No open positions right now.</td></tr>
-          </tbody>
-        </table>
+      <div class="panel positions-panel">
+        <div class="panel-head">
+          <span class="panel-title">Live trades <span class="muted" id="posCountPanel">(0)</span></span>
+          <span class="panel-hint">Scroll the list to see all positions ↓</span>
+        </div>
+        <div class="table-wrap table-scroll">
+          <table class="data-table" id="positionsTable">
+            <thead>
+              <tr><th>#</th><th>Symbol</th><th>Type</th><th>Volume</th><th>Entry</th><th>Current</th><th>SL</th><th>P/L</th><th>Opened</th></tr>
+            </thead>
+            <tbody id="positionsBody">
+              <tr class="empty-row"><td colspan="9">No open positions right now.</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
+
+  </div><!-- /view-positions -->
+
+  <!-- ============ PAGE: TRADE HISTORY ============ -->
+  <div class="page-view" data-view="history" id="view-history">
 
   <!-- ============ TRADE HISTORY ============ -->
   <section class="section section-alt" id="history">
@@ -279,6 +313,11 @@
       </div>
     </div>
   </section>
+
+  </div><!-- /view-history -->
+
+  <!-- ============ PAGE: INVEST (telegram + invest) ============ -->
+  <div class="page-view" data-view="invest" id="view-invest">
 
   <!-- ============ TELEGRAM ============ -->
   <section class="section" id="telegram">
@@ -315,25 +354,48 @@
     </div>
   </section>
 
+  </div><!-- /view-invest -->
+  </main>
+
   <!-- ============ FOOTER ============ -->
   <footer class="footer">
+    <!-- ============ RISK WARNING BANNER ============ -->
+    <div class="risk-banner" role="alert">
+      <div class="container risk-inner">
+        <span class="risk-icon" aria-hidden="true">⚠️</span>
+        <div class="risk-text">
+          <strong>Risk Warning — Trading involves substantial risk.</strong>
+          <span>Trading foreign exchange, gold (XAUUSD) and other leveraged products carries a <b>high level of risk</b> and may not be suitable for all investors. Market volatility can result in losses that exceed your initial deposit. Prices move rapidly and past performance is <b>not</b> indicative of future results. Only trade with capital you can afford to lose.</span>
+        </div>
+      </div>
+    </div>
+
     <div class="container footer-inner">
       <div class="footer-brand">
         <span class="brand-mark sm">W</span>
         <div>
-          <strong>W Forex</strong>
+          <strong>W Forex <span class="tag-private">Private</span></strong>
           <p>Smart gold trading bot · MT5 · XAUUSD</p>
         </div>
       </div>
       <div class="footer-cols">
-        <div><h4>Product</h4><a href="#about">About</a><a href="#how">How it works</a><a href="#chart">Live chart</a></div>
-        <div><h4>Trading</h4><a href="#positions">Positions</a><a href="#history">History</a><a href="#" id="footerTg">Telegram</a></div>
-        <div><h4>Company</h4><a href="/presentation">Investor deck</a><a href="/login">Sign in</a></div>
+        <div><h4>Platform</h4><a href="#about" data-nav="about">About</a><a href="#how" data-nav="how">How it works</a><a href="#chart" data-nav="chart">Live chart</a></div>
+        <div><h4>Trading</h4><a href="#positions" data-nav="positions">Positions</a><a href="#history" data-nav="history">History</a><a href="#" id="footerTg">Telegram</a></div>
+        <div><h4>Company</h4><a href="#invest" data-nav="invest">Invest</a><a href="/presentation">Investor deck</a><a href="/login">Sign in</a></div>
       </div>
     </div>
+
+    <!-- ============ LEGAL DISCLAIMER ============ -->
+    <div class="container footer-disclaimer">
+      <h4>Disclaimer</h4>
+      <p>This website and all its content — including the W Forex trading bot, dashboard, charts, analytics and signals — is the <strong>exclusive private property</strong> of W Forex. All information provided is for educational and informational purposes only and does <strong>not</strong> constitute financial, investment, trading or other advice, nor a solicitation to buy or sell any financial instrument.</p>
+      <p>W Forex does not guarantee any profit and accepts no liability for any direct or indirect losses arising from the use of this platform. Leverage and market volatility can work against you as well as for you. Before deciding to trade, you must carefully consider your objectives, financial situation, needs and level of experience. <strong>You are solely responsible for your own trading decisions and their outcomes.</strong></p>
+      <p class="muted">By using this website you acknowledge that you have read, understood and accepted this risk warning and disclaimer in full.</p>
+    </div>
+
     <div class="container footer-bottom">
-      <span>© <span id="year"></span> W Forex. All rights reserved.</span>
-      <span class="muted">Trading foreign exchange and gold carries a high level of risk. Past performance is not indicative of future results.</span>
+      <span>© <span id="year"></span> W Forex — Private Property. All rights reserved.</span>
+      <span class="muted">High-risk trading · Market volatility · Past performance is not indicative of future results.</span>
     </div>
   </footer>
 
