@@ -56,7 +56,7 @@ input bool   EnableTelegram         = true;
 // --- Dashboard (website) ---
 input group            "═══ 3. W Forex Dashboard (live website) ═══"
 input string DashboardURL           = "https://w-forex-dashboard.onrender.com/api/ea/data";
-input string DashboardToken         = "WFOREX_SECRET_2026";   // must match server AUTH_TOKEN
+input string DashboardToken         = "WFOREX_SECRET";   // must match server AUTH_TOKEN
 input bool   EnableDashboard        = true;
 input int    DashboardPushSeconds   = 3;       // push every N seconds
 input string BotName                = "W Forex Bot";

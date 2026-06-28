@@ -132,7 +132,7 @@ input double StratConfidenceStep    = 0.10;          // how fast confidence chan
 //================ DASHBOARD (Live Web Server) =================
 input bool   UseDashboard           = true;          // push live state to web dashboard
 input string DashboardURL           = "https://w-forex-dashboard.onrender.com"; // no trailing slash
-input string DashboardToken         = "WFOREX_SECRET_2026";   // must match AUTH_TOKEN on server
+input string DashboardToken         = "WFOREX_SECRET";   // must match AUTH_TOKEN on server
 input int    DashboardPushSec       = 5;             // seconds between pushes (min 2)
 input int    DashboardMode          = 1;             // 0=off, 1=on. For quick disable
 input int    DashboardHistoryBars   = 200;           // how many recent candles to push (0=current bar only)
@@ -871,7 +871,7 @@ bool DashboardSend(const string payload)
    // ensure no trailing slash
    if(StringGetCharacter(url, StringLen(url)-1) == '/')
       url = StringSubstr(url, 0, StringLen(url)-1);
-   url += "/api/update";
+   url += "/api/ea/data";
 
    char   data[];
    char   result[];
@@ -884,6 +884,7 @@ bool DashboardSend(const string payload)
 
    string headers = "Content-Type: application/json\r\n";
    headers += "X-Auth-Token: " + DashboardToken + "\r\n";
+   headers += "Authorization: Bearer " + DashboardToken + "\r\n";
 
    ResetLastError();
    int timeout = 5000;
@@ -936,6 +937,7 @@ void DashboardHeartbeat()
 
    string headers = "Content-Type: application/json\r\n";
    headers += "X-Auth-Token: " + DashboardToken + "\r\n";
+   headers += "Authorization: Bearer " + DashboardToken + "\r\n";
 
    WebRequest("POST", url, headers, 5000, data, result, resultHeaders);
 }

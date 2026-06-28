@@ -36,8 +36,8 @@ input string TelegramChatID    = "-1004394697587";
 input bool   EnableTelegram    = true;
 
 input group            "═══ 5. W Forex Dashboard (إرسال حيّ للموقع/التطبيق)  ═══"
-input string DashboardURL      = "http://localhost:3000/api/update"; // رابط السيرفر
-input string DashboardToken    = "WFOREX_SECRET_2026";               // التوكن
+input string DashboardURL      = "https://w-forex-dashboard.onrender.com/api/ea/data"; // رابط السيرفر
+input string DashboardToken    = "WFOREX_SECRET";               // التوكن
 input bool   EnableDashboard   = true;                               // تفعيل البث الحي
 input int    DashboardPushMs   = 1500;                               // الفاصل بين التحديثات (ms)
 
@@ -404,6 +404,7 @@ void PushToDashboard()
 
    string headers = "Content-Type: application/json\r\n" +
                     "X-Auth-Token: " + DashboardToken + "\r\n" +
+                    "Authorization: Bearer " + DashboardToken + "\r\n" +
                     "User-Agent: WForexMT5/1.10\r\n";
    uchar result[];
    string result_headers;
